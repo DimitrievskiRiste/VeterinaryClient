@@ -26,11 +26,11 @@ namespace VeterinaryHospital.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest model)
         {
-            if (!ModelState.IsValid())
+            if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var user = await _userManager.FindByNameAsync(model.Username);
+            var user = await _userManager.FindByNameAsync(model.Email);
             if (user == null || !(await _userManager.CheckPasswordAsync(user, model.Password)))
             {
                 return Unauthorized(new { Message = "Invalid username or password" });
@@ -43,8 +43,8 @@ namespace VeterinaryHospital.Controllers
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.GetFullName()),
+                new Claim(ClaimTypes.NameIdentifier, user.Name),
                 new Claim(ClaimTypes.Email, user.Email)
             }),
                 Expires = DateTime.UtcNow.AddHours(2),
