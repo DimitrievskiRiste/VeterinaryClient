@@ -1,0 +1,257 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+.login, .navigation, .modal {
+  background-color:#f3f3f3e6;
+  border:1px solid #cfcfcfdd;
+  box-shadow: 0 0 10px #dddd;
+}
+.control-group {
+  position:relative;
+}
+.control-group > .control-label{
+  position:absolute;
+  font-size:14px;
+  top:10px;
+  left:3px;
+}
+.anim-label {
+  color: #4882e8;
+  animation:transformLabel .5s forwards;
+  font-size:12px !important;
+}
+.nav-link-active {
+  border-bottom:2px solid #4882e8 !important;
+}
+@keyframes transformLabel {
+  0% {
+    top:10px;
+  }
+  100%{
+    font-size:10px !important;
+    top:0;
+  }
+}
+.control-input {
+  padding:10px;
+  border:1px solid rgba(117, 116, 116, 0.87);
+  font:inherit;
+  background:#ffff;
+}
+input,textarea,p,dl,dt,ul,li,dd,.nav-link {
+  font-size:15px;
+}
+.button-default {
+  padding:10px;
+  border:1px solid #dddd;
+  background: #ffff;
+  transition:all ease-in-out .5s;
+}
+.button-default:hover {
+  background:#dddd;
+  font-weight:bold;
+}
+span {
+  font-size:11px;
+}
+.error-text {
+  color: #be4848;
+}
+.nav-item,.nav-link {
+  position:relative;
+}
+.nav-item .nav-link {
+  padding:10px;
+  display: block;
+}
+.modal-overlay {
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  height:100%;
+  z-index:10;
+  background:rgba(0,0,0,0.2);
+}
+.modal {
+  position:relative;
+  z-index:11;
+  background:#ffff;
+  border:1px solid #959595dd;
+  padding:5px;
+}
+.loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70px;
+  height: 70px;
+  background: transparent;
+  border: 3px solid #3c3c3c;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 70px;
+  font-family: sans-serif;
+  font-size: 12px;
+  color: #00eaff;
+  text-transform: uppercase;
+  box-shadow: 0 0 20px rgba(0, 0, 0, .5);
+}
+.loader:before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 100%;
+  height: 100%;
+  border: 3px solid transparent;
+  border-top: 3px solid #00eaff;
+  border-right: 3px solid #00eaff;
+  border-radius: 50%;
+  animation: animateC 2s linear infinite;
+}
+.loader span {
+  display: block;
+  position: absolute;
+  top: calc(50% - 2px);
+  left: 50%;
+  width: 50%;
+  height: 4px;
+  background: transparent;
+  transform-origin: left;
+  animation: animate 2s linear infinite;
+}
+.loader span:before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #00eaff;
+  top: -6px;
+  right: -8px;
+  box-shadow: 0 0 20px #00eaff;
+}
+@keyframes animateC {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes animate {
+  0% {
+    transform: rotate(45deg);
+  }
+  100% {
+    transform: rotate(405deg);
+  }
+}
+.footer-copyright {
+  position:absolute;
+}
+.footer-links {
+  position: relative;
+  background-color:#171717;
+}
+.footer-links a, .footer-links span, .footer-links p, .footer-links h1, .footer-links h2, .footer-links h3, .footer-links h4 {
+  color:#ffff;
+}
+.footer-links .scrollerTop {
+  position:absolute;
+  top:-34px;
+  left:50%;
+}
+.scrollerTop:before{
+  display: block;
+  position: relative;
+  width:0;
+  content:"";
+  border-top:20px solid transparent;
+  border-left:20px solid transparent;
+  border-right:20px solid transparent;
+  border-bottom:20px solid #171717;
+}
+.scrollerTop:after{
+  display:block;
+  position:absolute;
+  width:0;
+  content:"";
+  cursor: pointer;
+  border-top:10px solid transparent;
+  border-left:10px solid transparent;
+  border-right:10px solid transparent;
+  border-bottom:10px solid #4882e8;
+  top:13px;
+  left:10px;
+}
+.main-content {
+  display:flex;
+  position:relative;
+  width:100%;
+}
+.login-bg{
+  display: flex;
+  position:relative;
+  width:100%;
+  min-height:400px;
+}
+.main-content::after, .login-bg::after{
+  position:absolute;
+  display:block;
+  opacity:0.7;
+  background:url("/animals-care.jpg");
+  background-repeat:no-repeat;
+  width:100%;
+  height:100%;
+  content:"";
+  background-clip:content-box;
+  background-position: top center;
+  background-size:100% 100%;
+}
+.whychooseus {
+  top:10px;
+  position:relative;
+}
+.section {
+  position: relative;
+  background:rgba(0,0,0,0.1);
+}
+.button-primary {
+  background:#4882e8;
+  padding:10px;
+  color:#ffff;
+  font-weight: bold;
+  transition: 0.2s ease-in-out all;
+  cursor: pointer;
+}
+.button-primary:hover{
+  background: #4175d2;
+  color:#ddd;
+  cursor: pointer;
+}
