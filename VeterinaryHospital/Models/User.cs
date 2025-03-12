@@ -7,25 +7,25 @@ namespace VeterinaryHospital.Models
     public class User : IdentityUser
     {
      
-        public int Id { get; set; }
         [Required(ErrorMessage = "Name is required")]
-        public string Name { get; set; }
+        public required string Name { get; set; }
         [EmailAddress(ErrorMessage = "Invalid email address.")]
         public required string Email { get; set; }
         [DataType(DataType.Password)]
-        public required string Password { get; set; }
-        public int Age { get; set; }
+        public string Password { get; set; }
+        public required int Age { get; set; }
         [DataType(DataType.Date)]
         [Required(ErrorMessage = "Valid birth date must be specified!")]
         public DateFormat BirthDate { get; set; }
         [DataType(DataType.Text)]
         [Required(ErrorMessage = "You must specify surname for client/admin")]
-        public string Surname { get; set; }
-        public string Token { get; set; }
+        public required string Surname { get; set; }
         public string GetFullName()
         {
             return $"{this.Name} {this.Surname}";
         }
+        public List<Pet> Pets { get; set; }
+        public required bool isVeterinarian { get; set; }
 
     }
 }
