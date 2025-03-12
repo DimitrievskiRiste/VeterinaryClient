@@ -2,11 +2,11 @@ import {FC, memo} from "react";
 import {LoadingLoop} from "@/Components/Icons";
 type ButtonType = {
     type:string;
-    isLoading:boolean;
-    child:any;
+    isLoading:boolean|string;
+    child:string|null;
     label:string;
-    props:any;
-    [key:string]:any;
+    props:string|null;
+    [key:string]:string|null;
 }
 const Button :FC<ButtonType> =  memo(function Button({type, isLoading, child, label, ...props}){
     return (

@@ -1,10 +1,15 @@
 "use client"
-import {useRef, useState} from "react";
-
-export default function AnimatedInput({type, label, ...props}:{type:string, label:string, props:any})
+import {FC, memo, useRef, useState} from "react";
+type AnimatedInput = {
+    type:string|null;
+    label:string|null;
+    props:string|null;
+    [key:string]:string|null;
+}
+const AnimatedInput:FC<AnimatedInput> = memo(function AnimatedInput({type, label, ...props})
 {
-    const [inputType, setInputType] = useState(type);
-    const [inputLabel, setInputLabel] = useState(label);
+    const [inputType] = useState(type);
+    const [inputLabel] = useState(label);
     const inputRef = useRef(null);
     const labelRef = useRef(null);
     const HandleTransformAnim = (e) => {
@@ -27,4 +32,5 @@ export default function AnimatedInput({type, label, ...props}:{type:string, labe
             </div>
         </>
     )
-}
+});
+export default AnimatedInput;

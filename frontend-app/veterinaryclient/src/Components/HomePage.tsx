@@ -3,21 +3,20 @@ import {memo, useState} from "react";
 const CookieNotice = dynamic(() => import("@/Components/CookieNotice"),{ssr:false});
 import NavigationComponent from "@/Components/NavigationComponent";
 import FooterComponent from "@/Components/FooterComponent";
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import Button from "@/Components/Button";
 import {useRouter} from "next/navigation";
-const HomePage = memo(function HomePage({props}:{props:any}){
+const HomePage = memo(function HomePage(){
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingReg, setIsLoadingReg] = useState(false);
     const router = useRouter();
     const HandleLoginBtn = () => {
         setIsLoading(true);
-        router.push("/login");
+        router.push("/profile/login");
     }
     const HandleRegisterBtn = () => {
         setIsLoadingReg(true);
-        router.push("/register");
+        router.push("/profile/register");
     }
     return (
         <>

@@ -1,6 +1,8 @@
+"use client";
 import Link from "next/link";
+import {memo} from "react";
 
-export default function FooterComponent()
+const FooterComponent = memo(function FooterComponent()
 {
     const ScrollToTop = () => {
         window.scrollTo({top:0,behavior:"smooth"});
@@ -27,4 +29,5 @@ export default function FooterComponent()
             </footer>
         </>
     )
-}
+});
+export default FooterComponent;

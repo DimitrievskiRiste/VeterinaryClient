@@ -5,6 +5,8 @@ import NavigationComponent from "@/Components/NavigationComponent";
 import {memo} from "react";
 import dynamic from "next/dynamic";
 import FooterComponent from "@/Components/FooterComponent";
+import Button from "@/Components/Button";
+import {useRouter} from "next/navigation";
 const CookieNotice = dynamic(() => import("@/Components/CookieNotice"),{ssr:false});
 export default function Login({...props}:{props:any}) {
     type FormData = {
@@ -19,6 +21,7 @@ export default function Login({...props}:{props:any}) {
         email:null,
         password:null
     });
+    const router = useRouter();
     const setEmail = (e) => {
         const v = e.target.value;
         if(/^([a-zA-Z0-9_]+@[a-zA-Z0-9]{2,}\.[a-z]{2,})$/.test(v)){
@@ -39,6 +42,16 @@ export default function Login({...props}:{props:any}) {
         }
         // to do handling login process.
     }
+    const [isLoading, setIsLoading] = useState(false);
+    const [isAccountRecoveryLoading, setAccountRecoveryLoading] = useState(false);
+
+    const RedirectToRegister = () => {
+        setIsLoading(true);
+        router.push("/profile/register");
+    }
+    const RedirectToResetPass = () => {
+        setAccountRecoveryLoading(true);
+    }
     return (
         <>
             <CookieNotice/>
@@ -58,10 +71,23 @@ export default function Login({...props}:{props:any}) {
                                 <AnimatedInput type="password" label="Account password"
                                                className="control-input rounded-md w-[100%]"
                                                onChange={setPassword}/>
-                                <div className="flex w-[100%] justify-center space-y-1">
+                                <div className="flex w-[100%] flex-col justify-center space-y-1">
                                     <button type="button" className="button-default w-[100%]">
                                         Login
                                     </button>
+                                    <div className="flex flex-row w-[100%] items-center">
+                                        <span className="whiteline w-[50%]"></span>
+                                        <span>OR</span>
+                                        <span className="whiteline w-[50%]"></span>
+                                    </div>
+                                    <Button type="button" isLoading={isAccountRecoveryLoading} className="button-default flex justify-center" label="Forgot password?"
+                                     onClick={RedirectToResetPass}/>
+                                    <div className="flex flex-row w-[100%] items-center">
+                                        <span className="whiteline w-[50%]"></span>
+                                        <span>OR</span>
+                                        <span className="whiteline w-[50%]"></span>
+                                    </div>
+                                    <Button type="button" className="button-primary flex justify-center" isLoading={isLoading} label="Create account" onClick={RedirectToRegister}/>
                                 </div>
                             </form>
                         </div>

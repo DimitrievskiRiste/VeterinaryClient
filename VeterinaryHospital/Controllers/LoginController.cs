@@ -35,7 +35,7 @@ namespace VeterinaryHospital.Controllers
             var user = await _userManager.FindByNameAsync(model.Email);
             if (user == null || _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, model.Password) == PasswordVerificationResult.Failed)
             {
-                return Unauthorized(new { Message = "Invalid email or password" });
+                return Unauthorized(new { isLoggedIn = false, Message = "Invalid email or password" });
             }
 
             // Generate JWT token
