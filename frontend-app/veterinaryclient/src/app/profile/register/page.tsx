@@ -5,6 +5,7 @@ import Link from "next/link";
 
 export default async function Register()
 {
+
     return (
         <>
             <div className="flex w-[100%] flex-col flex-wrap items-start space-y-1">

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -12,18 +13,21 @@ namespace VeterinaryHospital.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class LoginController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly IPasswordHasher<User> _passwordHasher;
-        public LoginController(UserManager<User> manager, SignInManager<User> signInManager, IConfiguration configuration, IPasswordHasher<User> passwordHasher)
+        private readonly ILogger<LoginController> _logger;
+        public LoginController(UserManager<User> manager, SignInManager<User> signInManager, IConfiguration configuration, IPasswordHasher<User> passwordHasher, ILogger<LoginController> logger)
         {
             _userManager = manager;
             _signInManager = signInManager;
             _configuration = configuration;
             _passwordHasher = passwordHasher;
+            _logger = logger;
         }
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest model)
@@ -60,13 +64,14 @@ namespace VeterinaryHospital.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
 
-            return Ok(new { Token = tokenString });
+            return Ok(new { Token = tokenString, isVeteriarian = user.isVeterinarian });
         }
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] User model)
         {
             if (!ModelState.IsValid)
             {
+                _logger.LogError("Invalid model state");
                 return BadRequest(ModelState);
             }
 

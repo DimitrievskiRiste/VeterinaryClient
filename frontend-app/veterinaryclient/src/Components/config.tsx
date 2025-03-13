@@ -1,11 +1,15 @@
 type ApiConfig = {
     token:string
 }
+function replacer(key: string, value: any) {
+    return typeof value === 'bigint' ? value.toString() : value;
+}
+
 /**
  * @returns API Backend URL
  */
 export const apiUrl = () => {
-    return 'http://localhost:4000'
+    return 'http://localhost:40416'
 }
 
 /**
@@ -16,20 +20,21 @@ export const apiUrl = () => {
  * @returns API response data from the server
  */
 export async function sendData(endpoint:string, method:string, data:object){
-    const request = await fetch(apiUrl+endpoint,{
+    const request = await fetch(`${apiUrl()}/${endpoint}`,{
         headers:{
             "Content-Type":"application/json"
         },
         method:method,
         credentials:"include",
-        body:JSON.stringify(data)
+        body:JSON.stringify(data, replacer)
     });
     if(!request.ok)
     {
         const errors = request.statusText;
         return {
             hasErrors:true,
-            message:errors
+            message:errors,
+            request:request.json()
         }
     } else {
         return request.json();
@@ -46,7 +51,7 @@ export async function sendData(endpoint:string, method:string, data:object){
  */
 export async function fetchAuthorizedData(endpoint:string, jwtToken:string, method:string, data:object)
 {
-    const request = await fetch(apiUrl+endpoint, {
+    const request = await fetch(`${apiUrl()}/${endpoint}`, {
         headers:{
             "Content-Type":"application/json",
             "Authorization":`Bearer ${jwtToken}`
