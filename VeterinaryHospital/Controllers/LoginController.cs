@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualBasic;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -14,7 +16,7 @@ namespace VeterinaryHospital.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [AllowAnonymous]
-    public class LoginController : ControllerBase
+    public class LoginController : Controller
     {
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
@@ -29,15 +31,15 @@ namespace VeterinaryHospital.Controllers
             _passwordHasher = passwordHasher;
             _logger = logger;
         }
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest model)
+        [HttpPost("/")]
+        public async Task<IActionResult> Index([FromBody] LoginRequest model)
         {
             if (!ModelState.IsValid)
-            {   
+            {
                 return BadRequest(ModelState);
             }
-            var user = await _userManager.FindByNameAsync(model.Email);
-            if (user == null || _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, model.Password) == PasswordVerificationResult.Failed)
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password) == PasswordVerificationResult.Failed)
             {
                 return Unauthorized(new { isLoggedIn = false, Message = "Invalid email or password" });
             }
@@ -45,7 +47,7 @@ namespace VeterinaryHospital.Controllers
             // Generate JWT token
             var tokenHandler = new JwtSecurityTokenHandler();
             var secretKey = _configuration["JwtSettings:SecretKey"];
-            if(string.IsNullOrEmpty(secretKey))
+            if (string.IsNullOrEmpty(secretKey))
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Internal server error" });
             }
@@ -64,36 +66,8 @@ namespace VeterinaryHospital.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
 
-            return Ok(new { Token = tokenString, isVeteriarian = user.isVeterinarian });
+            return Ok(new { Token = tokenString, IsVeteriarian = user.IsVeterinarian });
         }
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] User model)
-        {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Invalid model state");
-                return BadRequest(ModelState);
-            }
-
-            var user = new User
-            {
-                Name = model.Name,
-                Email = model.Email,
-                Surname = model.Surname,
-                BirthDate = model.BirthDate,
-                Age = model.Age,
-                isVeterinarian = model.isVeterinarian,
-                Password = model.Password
-            };
-            user.PasswordHash = _passwordHasher.HashPassword(user, model.Password);
-            var result = await _userManager.CreateAsync(user);
-            if (!result.Succeeded)
-            {
-                return BadRequest(new { isRegistered = false });
-            }
-
-            return Ok(new { Message = "User registered successfully", isRegistered = true });
-        }
-
     }
+         
 }

@@ -13,19 +13,21 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-builder.Services.AddControllersWithViews();
-builder.Services.AddMemoryCache();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontEnd", builder =>
     {
-        builder.WithOrigins(["https://localhost:3000", "http://localhost:3000"])
+        builder.WithOrigins(["https://localhost:3000", "http://localhost:3000", "localhost", "127.0.0.1", "http://192.168.1.2:3000"])
         .AllowAnyMethod()
-        .AllowAnyMethod()
-        .AllowCredentials();
+        .AllowAnyHeader()
+        .AllowCredentials()
+        .SetIsOriginAllowed(origin => new[] { "https://localhost:3000", "http://localhost:3000", "localhost", "127.0.0.1", "http://192.168.1.2:3000" }.Contains(origin));
     });
 });
+
+builder.Services.AddControllersWithViews();
+builder.Services.AddMemoryCache();
+
 builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:SecretKey"]);
@@ -48,7 +50,14 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true
     };
 });
-
+builder.Services.AddControllers();
+builder.Services.AddLogging(logging =>
+{
+    logging.ClearProviders();
+    logging.AddConsole();
+    logging.SetMinimumLevel(LogLevel.Information);
+});
+builder.Services.AddMemoryCache();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -63,10 +72,15 @@ else
 app.UseStaticFiles();
 
 app.UseRouting();
-
-
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+app.UseCors("AllowFrontEnd");
+/*
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+*/
 
 app.Run();

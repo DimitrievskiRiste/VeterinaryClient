@@ -18,20 +18,11 @@ const AnimatedInput:FC<AnimatedInputProps> = memo(function AnimatedInput({type, 
     const HandleTransformAnim = (e) => {
         labelRef.current.classList.add('anim-label');
     }
-    const HandleBackAnim = (e) => {
-        if(e.target.value === undefined){
-            return;
-        }
-        if(!e.target.value){
-            labelRef.current.classList.add('animLabelOff');
-            labelRef.current.classList.remove('anim-label');
-        }
-    }
     return (
         <>
             <div className="control-group">
-                <label ref={labelRef} className="control-label" onMouseEnter={HandleTransformAnim} onMouseLeave={HandleBackAnim}>{inputLabel}</label>
-                <input ref={inputRef} type={inputType} onMouseEnter={HandleTransformAnim} onMouseLeave={HandleBackAnim} {...props}/>
+                <label ref={labelRef} className="control-label" onMouseEnter={HandleTransformAnim} onClick={HandleTransformAnim} >{inputLabel}</label>
+                <input ref={inputRef} type={inputType} onMouseEnter={HandleTransformAnim} onFocus={HandleTransformAnim} onClick={HandleTransformAnim}  {...props}/>
             </div>
         </>
     )

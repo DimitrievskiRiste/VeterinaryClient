@@ -1,10 +1,12 @@
 "use client";
-import React, {memo, useState} from "react";
+import React, {memo, useEffect, useState} from "react";
 import AnimatedInput from "@/Components/AnimatedInput";
 import Button from "@/Components/Button";
 import {useRouter} from "next/navigation";
+import axios from "axios";
 const RegisterForm = memo(function RegisterForm() {
     type FormData = {
+        UserName:string|null;
         Name: string | null;
         Email: string | null;
         Surname: string | null;
@@ -14,15 +16,17 @@ const RegisterForm = memo(function RegisterForm() {
         Password: null | string;
     }
     const [formData, setFormData] = useState<FormData>({
+        UserName:null,
         Name: null,
         Email: null,
         Surname: null,
         BirthDate: null,
         Age: null,
-        isVeterinarian: false,
+        IsVeterinarian: false,
         Password: null,
     });
     const [formErrors, setFormErrors] = useState<FormData>({
+        UserName:null,
         Name:null,
         Email:null,
         Surname:null,
@@ -31,6 +35,9 @@ const RegisterForm = memo(function RegisterForm() {
         isVeterinarian:null,
         Password:null
     });
+    useEffect(() => {
+        console.log(formData);
+    },[formData]);
     const [isLoading, setIsLoading] = useState(false);
     const [isLoginPageLoading, setIsLoginPageLoading] = useState(false);
     const router = useRouter();
@@ -46,8 +53,17 @@ const RegisterForm = memo(function RegisterForm() {
                 if(value.length < 3 || /^\W+$/.test(value)){
                     setFormErrors((prev) => ({...prev, [name]: "Name must be at least 3 characters long!"}));
                 } else {
-                    setFormErrors((prev) => ({...prev, [name]: null}));
-                    setFormData((prev) => ({...prev, [name]: value}));
+                    if(name === "UserName"){
+                        if(/^[a-zA-Z0-9]+$/.test(value)){
+                            setFormData((prev) => ({...prev, [name]: value}));
+                            setFormErrors((prev) => ({...prev, [name]: null}));
+                        } else {
+                            setFormErrors((prev) => ({...prev, [name]: "Invalid username!"}));
+                        }
+                    } else {
+                        setFormErrors((prev) => ({...prev, [name]: null}));
+                        setFormData((prev) => ({...prev, [name]: value}));
+                    }
                 }
                 break;
             case "email":
@@ -83,20 +99,19 @@ const RegisterForm = memo(function RegisterForm() {
         e.preventDefault();
         if(Object.values(formErrors).every((val) => val === null)) {
             setIsLoading(true);
-            const req = await fetch("/api/register", {
+            const req = await axios("/api/register", {
                 method:"POST",
                 headers:{
                     "Content-Type":"application/json"
                 },
-                body:JSON.stringify(formData)
+                data:JSON.stringify(formData)
             });
-            if(req.ok){
-                const res = await req.json();
-                if(res.success){
+            if(req.data){
+                const res = req.data;
+                if(!res.hasError && !res.hasErrors){
                     router.push("/profile/login");
                 } else {
                     setIsLoading(false);
-                    console.log(res);
                     alert("Error: "+res.message);
                 }
             } else {
@@ -114,13 +129,15 @@ const RegisterForm = memo(function RegisterForm() {
                             <div className="flex flex-wrap w-[100%] justify-center">
                                 <h1 className="font-extrabold drop-shadow-md">Register form</h1>
                             </div>
+                            <AnimatedInput type="text" label="User name" name="UserName" className="control-input rounded-md w-[100%]" onChange={onChangeInput}/>
+                            {formErrors.UserName ? <span className="error-text">Error: {formErrors.UserName}</span> : null}
                             <AnimatedInput type="text" label="Name" name="Name" className="control-input rounded-md w-[100%]" onChange={onChangeInput}/>
                             {formErrors.Name ? <span className="error-text">Error: {formErrors.Name}</span> : null}
                             <AnimatedInput type="email" label="Email address" name="Email" className="control-input rounded-md w-[100%]" onChange={onChangeInput}/>
                             {formErrors.Email ? <span className="error-text">Error: {formErrors.Email}</span> : null}
                             <AnimatedInput type="text" label="Surname" name="Surname" className="control-input rounded-md w-[100%]" onChange={onChangeInput}/>
                             {formErrors.Surname ? <span className="error-text">Error: {formErrors.Surname}</span> : null}
-                            <AnimatedInput type="date" label="Birth date" name="BirthDate" className="control-input rounded-md w-[100%]" onChange={onChangeInput}/>
+                            <AnimatedInput type="date" label="Birth date"  min="1930-01-01" name="BirthDate" className="control-input rounded-md w-[100%]" onChange={onChangeInput}/>
                             {formErrors.BirthDate ? <span className="error-text">Error: {formErrors.BirthDate}</span> : null}
                             <AnimatedInput type="password" label="Password" name="Password" className="control-input rounded-md w-[100%]" onChange={onChangeInput}/>
                             {formErrors.Password ? <span className="error-text">Error: {formErrors.Password}</span> : null}

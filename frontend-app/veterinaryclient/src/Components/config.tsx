@@ -1,15 +1,10 @@
-type ApiConfig = {
-    token:string
-}
-function replacer(key: string, value: any) {
-    return typeof value === 'bigint' ? value.toString() : value;
-}
+import axios from "axios";
 
 /**
  * @returns API Backend URL
  */
 export const apiUrl = () => {
-    return 'http://localhost:40416'
+    return 'http://localhost:5207'
 }
 
 /**
@@ -20,24 +15,31 @@ export const apiUrl = () => {
  * @returns API response data from the server
  */
 export async function sendData(endpoint:string, method:string, data:object){
-    const request = await fetch(`${apiUrl()}/${endpoint}`,{
-        headers:{
-            "Content-Type":"application/json"
-        },
-        method:method,
-        credentials:"include",
-        body:JSON.stringify(data, replacer)
-    });
-    if(!request.ok)
-    {
-        const errors = request.statusText;
+    try {
+        const request = await axios(`${apiUrl()}/${endpoint}`,{
+            headers:{
+                "Content-Type":"application/json",
+                "User-Agent":"Mozilla/5.0"
+            },
+            method:method,
+            data:JSON.stringify(data)
+        });
+        if(!request.data)
+        {
+            const errors = request.statusText;
+            return {
+                hasErrors:true,
+                message:errors
+            }
+        } else {
+            return request.data;
+        }
+    } catch(error) {
+        console.error("Error in sendData:", error.response?.data || error.message);
         return {
             hasErrors:true,
-            message:errors,
-            request:request.json()
+            message:"An error occurred while processing your request!"
         }
-    } else {
-        return request.json();
     }
 }
 

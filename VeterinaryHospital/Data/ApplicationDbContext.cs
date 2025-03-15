@@ -1,14 +1,19 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using VeterinaryHospital.Models;
 
 namespace VeterinaryHospital.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {
+
+       
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+           
+           
         }
         public DbSet<User>Users { get; set; }
         public DbSet<Pet> Pets { get; set; }
