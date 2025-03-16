@@ -10,5 +10,7 @@
 
         public User User { get; set; }
         public List<Vaccine> Vaccines { get; set; }
+        public int AvatarId { get; set; }
+        public Avatar ? Avatar { get; set; }
     }
 }

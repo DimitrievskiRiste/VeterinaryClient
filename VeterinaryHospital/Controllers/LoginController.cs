@@ -31,8 +31,8 @@ namespace VeterinaryHospital.Controllers
             _passwordHasher = passwordHasher;
             _logger = logger;
         }
-        [HttpPost("/")]
-        public async Task<IActionResult> Index([FromBody] LoginRequest model)
+        [HttpPost]
+        public async Task<IActionResult> Index([FromBody] User model)
         {
             if (!ModelState.IsValid)
             {
@@ -58,7 +58,8 @@ namespace VeterinaryHospital.Controllers
                 {
                 new Claim(ClaimTypes.Name, user.GetFullName()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Email, user.Email)
+                new Claim(ClaimTypes.Email, user.Email),
+
             }),
                 Expires = DateTime.UtcNow.AddHours(2),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -66,7 +67,7 @@ namespace VeterinaryHospital.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
 
-            return Ok(new { Token = tokenString, IsVeteriarian = user.IsVeterinarian });
+            return Ok(new { Token = tokenString, IsAdmin = user.Group.IsAdminGroup});
         }
     }
          

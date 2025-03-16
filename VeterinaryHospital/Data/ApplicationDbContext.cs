@@ -17,7 +17,9 @@ namespace VeterinaryHospital.Data
         }
         public DbSet<User>Users { get; set; }
         public DbSet<Pet> Pets { get; set; }
-        public DbSet<Vaccine>Vaccines { get; set; }
+        public DbSet<Vaccine> Vaccines { get; set; }
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<Avatar> Avatars { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -32,6 +34,18 @@ namespace VeterinaryHospital.Data
                 .HasMany(p => p.Vaccines)
                 .WithOne(v => v.Pet)
                 .HasForeignKey(v => v.PetId);
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Group)
+                .WithMany(g => g.Users)
+                .HasForeignKey(u => u.GroupId);
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Avatar)
+                .WithMany(a => a.Users)
+                .HasForeignKey(u => u.AvatarId);
+            modelBuilder.Entity<Pet>()
+                .HasOne(p => p.Avatar)
+                .WithMany(a => a.Pets)
+                .HasForeignKey(p => p.AvatarId);
         }
     }
 }

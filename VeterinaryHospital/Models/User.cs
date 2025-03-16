@@ -23,7 +23,11 @@ namespace VeterinaryHospital.Models
             return $"{this.Name} {this.Surname}";
         }
         public List<Pet>? Pets { get; set; } = new List<Pet>();
-        public required bool IsVeterinarian { get; set; }
-     
+        [Required(ErrorMessage = "You must specify a group for the user")]
+        public required int GroupId { get; set; }
+        public Group Group { get; set; }
+        public int AvatarId { get; set; }
+        public Avatar? Avatar { get; set; }
+
     }
 }
