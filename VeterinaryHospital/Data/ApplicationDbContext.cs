@@ -45,7 +45,8 @@ namespace VeterinaryHospital.Data
             modelBuilder.Entity<Pet>()
                 .HasOne(p => p.Avatar)
                 .WithMany(a => a.Pets)
-                .HasForeignKey(p => p.AvatarId);
+                .HasForeignKey(p => p.AvatarId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

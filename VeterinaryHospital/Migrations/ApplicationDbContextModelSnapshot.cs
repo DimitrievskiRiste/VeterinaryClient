@@ -229,6 +229,71 @@ namespace VeterinaryHospital.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("VeterinaryHospital.Models.Avatar", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Extension")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MimeType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Avatars");
+                });
+
+            modelBuilder.Entity("VeterinaryHospital.Models.Group", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("CanAdd")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanDelete")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanEdit")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsAdminGroup")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Groups");
+                });
+
             modelBuilder.Entity("VeterinaryHospital.Models.Pet", b =>
                 {
                     b.Property<int>("Id")
@@ -238,6 +303,9 @@ namespace VeterinaryHospital.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("Age")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AvatarId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -255,6 +323,8 @@ namespace VeterinaryHospital.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AvatarId");
 
                     b.HasIndex("UserId");
 
@@ -292,11 +362,14 @@ namespace VeterinaryHospital.Migrations
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
+                    b.Property<int>("AvatarId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsVeterinarian")
-                        .HasColumnType("bit");
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -309,6 +382,10 @@ namespace VeterinaryHospital.Migrations
                     b.Property<string>("Surname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.HasIndex("AvatarId");
+
+                    b.HasIndex("GroupId");
 
                     b.HasDiscriminator().HasValue("User");
                 });
@@ -366,6 +443,12 @@ namespace VeterinaryHospital.Migrations
 
             modelBuilder.Entity("VeterinaryHospital.Models.Pet", b =>
                 {
+                    b.HasOne("VeterinaryHospital.Models.Avatar", "Avatar")
+                        .WithMany("Pets")
+                        .HasForeignKey("AvatarId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("VeterinaryHospital.Models.User", "User")
                         .WithMany("Pets")
                         .HasForeignKey("UserId")
@@ -375,6 +458,8 @@ namespace VeterinaryHospital.Migrations
                     b.HasOne("VeterinaryHospital.Models.Vaccine", null)
                         .WithMany("Pets")
                         .HasForeignKey("VaccineId");
+
+                    b.Navigation("Avatar");
 
                     b.Navigation("User");
                 });
@@ -388,6 +473,37 @@ namespace VeterinaryHospital.Migrations
                         .IsRequired();
 
                     b.Navigation("Pet");
+                });
+
+            modelBuilder.Entity("VeterinaryHospital.Models.User", b =>
+                {
+                    b.HasOne("VeterinaryHospital.Models.Avatar", "Avatar")
+                        .WithMany("Users")
+                        .HasForeignKey("AvatarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("VeterinaryHospital.Models.Group", "Group")
+                        .WithMany("Users")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Avatar");
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("VeterinaryHospital.Models.Avatar", b =>
+                {
+                    b.Navigation("Pets");
+
+                    b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("VeterinaryHospital.Models.Group", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("VeterinaryHospital.Models.Pet", b =>

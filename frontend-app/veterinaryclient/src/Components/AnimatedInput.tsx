@@ -20,7 +20,7 @@ const AnimatedInput:FC<AnimatedInputProps> = memo(function AnimatedInput({type, 
     }
     return (
         <>
-            <div className="control-group">
+            <div className="control-group w-[100%]">
                 <label ref={labelRef} className="control-label" onMouseEnter={HandleTransformAnim} onClick={HandleTransformAnim} >{inputLabel}</label>
                 <input ref={inputRef} type={inputType} onMouseEnter={HandleTransformAnim} onFocus={HandleTransformAnim} onClick={HandleTransformAnim}  {...props}/>
             </div>

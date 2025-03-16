@@ -26,7 +26,7 @@ namespace VeterinaryHospital.Models
         [Required(ErrorMessage = "You must specify a group for the user")]
         public required int GroupId { get; set; }
         public Group Group { get; set; }
-        public int AvatarId { get; set; }
+        public int ?AvatarId { get; set; }
         public Avatar? Avatar { get; set; }
 
     }

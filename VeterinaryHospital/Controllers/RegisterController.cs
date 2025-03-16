@@ -44,40 +44,11 @@ namespace VeterinaryHospital.Controllers
 
                 }
 
-                if (string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Surname) || string.IsNullOrEmpty(model.Password) || string.IsNullOrEmpty(model.PhoneNumber))
+                if (string.IsNullOrEmpty(model.Name) || string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Surname))
                 {
                     return Ok(new { hasError = true, Message = "All fields are required!" });
                 }
-                // Create default admin group if it doesn't exist from database
-                if(_context.Groups.FirstOrDefault(x => x.IsAdminGroup) == null)
-                {
-                    var group = new Group
-                    {
-                        Name = "Admins",
-                        Title = "Admin",
-                        CanEdit = true,
-                        CanDelete = true,
-                        CanAdd = true,
-                        IsAdminGroup = true
-                    };
-                    _context.Groups.Add(group);
-                    await _context.SaveChangesAsync();
-                }
-                // create default regular users if it doesn't exist from database
-                if (_context.Groups.FirstOrDefault(x => !x.IsAdminGroup) == null)
-                {
-                    var group = new Group
-                    {
-                        Name = "Users",
-                        Title = "User",
-                        CanEdit = false,
-                        CanDelete = false,
-                        CanAdd = false,
-                        IsAdminGroup = false
-                    };
-                    _context.Groups.Add(group);
-                    await _context.SaveChangesAsync();
-                }
+              
                 // get the regular group
                 var RegularGroup = _context.Groups.FirstOrDefault(x => !x.IsAdminGroup);
                 var user = new User
@@ -124,8 +95,8 @@ namespace VeterinaryHospital.Controllers
         public string Surname { get; set; }
         public DateTime BirthDate { get; set; }
         public int Age { get; set; }
-        public bool IsVeterinarian { get; set; }
+        public int GroupId { get; set; }
         public string Password { get; set; }
-        public string PhoneNumber { get; set; }
+        public string ?PhoneNumber { get; set; }
     }
 }
