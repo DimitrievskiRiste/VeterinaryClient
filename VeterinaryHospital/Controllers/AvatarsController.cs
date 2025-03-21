@@ -33,7 +33,7 @@ namespace VeterinaryHospital.Controllers
                     return Unauthorized(new { Message = "User not found" });
                 }
                 var user = _context.Users.FirstOrDefault(u => u.Email == userId);
-                if (user == null || user.Id != form.UserId)
+                if (user == null)
                 {
                     return Unauthorized(new { Message = "User not found" });
                 }

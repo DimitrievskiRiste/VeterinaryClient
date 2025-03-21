@@ -1,7 +1,7 @@
 import {NextRequest, NextResponse} from "next/server";
 import {fetchAuthorizedData} from "@/Components/config";
 
-export default async function GET(request:NextRequest)
+export async function GET(request:NextRequest)
 {
     try {
         const token = request.cookies.get("token")?.value;

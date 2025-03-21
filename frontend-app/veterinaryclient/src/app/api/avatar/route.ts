@@ -3,17 +3,21 @@ import fs from "fs";
 import {fetchAuthorizedData} from "@/Components/config";
 import {fileTypeFromBuffer} from "file-type";
 import {use} from "react";
+import {cookies} from "next/headers";
 export async function POST(req:NextRequest)
 {
     try {
-        const token = req.cookies.get("token")?.value;
+        const c = await cookies();
+        const token = c.get("token")?.value;
         if(!token){
+            console.log("[API] User is not authenticated. Missing token.");
             return new NextResponse.json({status:401, body:"Unauthorized"},{status:401, statusText:"Unauthorized API access."});
         }
         const form = await req.formData();
         const file = form.get("avatar") as File;
-        const userId = form.get("userId") as string;
-        if(!file || !userId){
+        const userId = form.get("UserId") as string;
+        console.log(userId);
+        if(!file || !userId) {
             return NextResponse.json({status:400, body:"No file was uploaded!"},{status:400, statusText:"No file was uploaded!"});
         }
         const buffer = Buffer.from(await file.arrayBuffer());
@@ -29,17 +33,13 @@ export async function POST(req:NextRequest)
                 const ext = filetype.ext;
                 const size = file.size;
                 const avatarPath = `public/avatars/${userId}/${name}.${ext}`;
-                if(!fs.existsSync("public/avatars")) {
-                    fs.mkdirSync("public/avatars");
-                    if (!fs.existsSync(`public/avatars/${userId}`)) {
-                        fs.mkdirSync(`public/avatars/${userId}`);
-                    }
+                if(!fs.existsSync(avatarPath)) {
+                    fs.mkdirSync(`public/avatars/${userId}`, {recursive:true});
                 }
                 const publicAvatar = `/avatars/${userId}/${name}.${ext}`;
                 fs.writeFileSync(avatarPath, buffer);
                 const e = {
                     Name:name,
-                    UserId:userId,
                     ImagePath:publicAvatar,
                     ImageSize:size,
                     MimeType:mime,

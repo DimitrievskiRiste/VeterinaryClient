@@ -89,35 +89,43 @@ namespace VeterinaryHospital.Controllers
             {
                 return Unauthorized(new { Message = "User not found" });
             }
-            if (user.Group.IsAdminGroup)
-            {
-                var pets = _cache.Get<List<Pet>>("pets");
-                if (pets == null)
-                {
-                    pets = await _context.Pets.ToListAsync();
-                    _cache.Set("pets", pets, new MemoryCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30)
-                    });
-                }
-                return Ok(pets);
-            }
-            else
-            {
                 // get user pets from cache if exists, if not get it from database and save it to cache
                 var pets = _cache.Get<List<Pet>>("pets");
+                
                 if (pets == null)
                 {
-                    pets = await _context.Pets.Where(x => x.UserId == user.Id).ToListAsync();
+                    pets = await _context.Pets.Include("Avatar").Where(x => x.UserId == user.Id).ToListAsync();
                     _cache.Set("pets", pets, new MemoryCacheEntryOptions
                     {
                         AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30)
                     });
+                    
                 }
                 // check in cache if pet is for the current user
                 pets = pets.Where(x => x.UserId == user.Id).ToList();
-                return Ok(pets);
-            }
+                
+            // for each pets get the avatar relationship from cache if it doesn't exist get it from database and save it to cache
+                foreach (var pet in pets)
+                {
+                var avatar = _cache.Get<Avatar>($"avatar-{pet.AvatarId}");
+                    if (avatar == null)
+                    {
+                        avatar = _context.Avatars.FirstOrDefault(x => x.Id == pet.AvatarId);
+                        _cache.Set($"avatar-{pet.AvatarId}", avatar, new MemoryCacheEntryOptions
+                        {
+                            AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30)
+                        });
+                    }
+                    pet.Avatar = avatar;
+                  pet.User = new Models.User {
+                    Name = $"{user.Name} {user.Surname}",
+                    Age = user.Age,
+                    Surname = user.Surname,
+                    GroupId = user.GroupId
+                }; 
+                }
+                _logger.LogInformation("Pets retrieved successfully, {pets}", pets);
+            return Ok(pets);
         }
     }
     public class  PetForm

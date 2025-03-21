@@ -19,11 +19,12 @@ const MembersTemplate:FC<MembersTemplate> = memo(function MembersTemplate({data,
                 method:"POST"
             });
             const d = await res.json();
-            setUserData(d);
-            console.log(typeof data);
             if(data && typeof data === "function"){
                 data(d);
             }
+            setUserData(d);
+            console.log(typeof data);
+
             return true;
         }
         getUser();

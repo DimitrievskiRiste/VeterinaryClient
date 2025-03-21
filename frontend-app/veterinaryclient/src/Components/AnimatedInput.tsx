@@ -1,5 +1,5 @@
 "use client"
-import {FC, memo, useRef, useState} from "react";
+import {FC, memo, useEffect, useRef, useState} from "react";
 type AnimatedInputProps = {
     type: string | null;
     label: string | null;
@@ -18,6 +18,11 @@ const AnimatedInput:FC<AnimatedInputProps> = memo(function AnimatedInput({type, 
     const HandleTransformAnim = (e) => {
         labelRef.current.classList.add('anim-label');
     }
+    useEffect(() => {
+        if(inputRef.current?.value.length > 0) {
+            labelRef.current.classList.add('anim-label');
+        }
+    }, [inputRef.current]);
     return (
         <>
             <div className="control-group w-[100%]">

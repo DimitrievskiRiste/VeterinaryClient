@@ -1,0 +1,239 @@
+import {FC, memo, useEffect, useRef, useState} from "react";
+import {useRouter} from "next/navigation";
+import MembersTemplate from "@/Components/MembersTemplate";
+import Link from "next/link";
+import {LoadingLoop} from "@/Components/Icons";
+import Button from "@/Components/Button";
+import AnimatedInput from "@/Components/AnimatedInput";
+
+type PetForm = {
+    data:any;
+    user:any;
+}
+const PetForm:FC<PetForm> = memo(function PetForm({data, user}) {
+    type PetInfo = {
+        PetId: number | null;
+        Name: string | null;
+        Age: number;
+        AvatarId: number | null;
+        Type: string | null;
+    }
+    const [isFormSubmitting, setIsFormSubmitting] = useState(false);
+    const [userData, setUserData] = useState(user ? user : null);
+    const [isFileUploading, setIsFileUploading] = useState(false);
+    const [formData, setFormData] = useState(data ? data : null);
+    const [petInfo, setPetInfo] = useState<PetInfo>({
+        PetId: formData ? formData.PetId : null,
+        Name: formData ? formData.Name : null,
+        Age: formData ? formData.age : 0,
+        AvatarId: formData ? formData.avatarid : null,
+        UserId:null,
+        Type:formData ? formData.type : null
+    });
+    const [formErrors, setFormErrors] = useState<PetInfo>({
+        Name: null,
+        Age: null,
+        AvatarId: null,
+        Type: null
+    });
+    const uploadBtn = useRef(null);
+    const [avatarPreview, setAvatarPreview] = useState(null);
+    const UploadAvatar = () => {
+        uploadBtn.current.click();
+    }
+    const router = useRouter();
+    const HandleUpload = async (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        switch(file.type){
+            case "image/png":
+            case "image/jpeg":
+                setIsFileUploading(true);
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    setAvatarPreview(e.target.result);
+                }
+                reader.readAsDataURL(file);
+                const formData = new FormData();
+                formData.set("avatar", file);
+                formData.set("UserId", userData.id);
+                const upload = await fetch("/api/avatar", {
+                    method:"POST",
+                    body:formData
+                });
+                const data = await upload.json();
+                switch(data.status){
+                    case 200:{
+                        if(data.hasErrors === true){
+                            alert(data.message);
+                            return;
+                        } else {
+                            setIsFileUploading(false);
+                            setPetInfo((prev) => ({...prev, AvatarId: data.body.model.id}));
+                            return;
+                        }
+                    }
+                    case 401: {
+                        alert("Your session has been expired, please re-login");
+                        router.push("/profile/login");
+                    }
+                    default:{
+                        alert(upload.statusText);
+                    }
+                }
+                break;
+            default:
+                alert("Invalid file format.");
+                break;
+        }
+    }
+    const ValidateInput = (e) => {
+        const {type, name, value} = e.target;
+        switch(type){
+            case "text":{
+                if(value.length < 3){
+                    setFormErrors((prev) => ({...prev, [name]: "Name must be at least 3 characters long!"}));
+                } else if (!/^[a-zA-Z\s]+$/.test(value)){
+                    setFormErrors((prev) => ({...prev, [name]: "Name must contain only letters!"}));
+                } else {
+                    setFormErrors((prev) => ({...prev, [name]: null}));
+                    setPetInfo((prev) => ({...prev, [name]:value}));
+                }
+                break;
+            }
+            case "number":{
+                if(value < 1 || value > 50){
+                    setFormErrors((prev) => ({...prev, [name]: "Age must be between 1 and 50 years!"}));
+                } else {
+                    setFormErrors((prev) => ({...prev, [name]: null}));
+                    setPetInfo((prev) => ({...prev, [name]:parseInt(value)}));
+                }
+                break;
+            }
+        }
+    }
+    useEffect(() => {
+        if(user != null && typeof user === "object"){
+            setPetInfo((prev) => ({...prev, UserId:user.id}));
+        }
+        if(data != null && typeof data === "object"){
+            setPetInfo((prev) => ({...prev, ...data}));
+            setFormData(data);
+        }
+    },[user, data]);
+    const handleForm = async (e) => {
+        e.preventDefault();
+        if (!petInfo.Name || !petInfo.Age) {
+            alert("Please fill all fields.");
+            return;
+        }
+        if (!petInfo.AvatarId) {
+            alert("Please upload an avatar for your pet.");
+            return;
+        }
+        setIsFormSubmitting(true);
+        let res;
+        if(formData != null ){
+            res = await fetch("/api/pets/edit", {
+                method: "POST",
+                body: JSON.stringify(petInfo)
+            });
+        } else {
+            res = await fetch("/api/pets/add", {
+                method: "POST",
+                body: JSON.stringify(petInfo)
+            });
+        }
+        const data = await res.json();
+        switch (data.status) {
+            case 200: {
+                setIsFormSubmitting(false);
+                if (data.hasErrors === true) {
+                    alert(data.message);
+                    return;
+                } else {
+                    alert("Pet added successfully.");
+                    router.push("/account/pets");
+                    return;
+                }
+            }
+            case 401: {
+                alert("Your session has been expired, please re-login");
+                router.push("/profile/login");
+                return;
+            }
+            default: {
+                alert(res.statusText);
+                return;
+            }
+        }
+    }
+    return (
+        <>
+                <div className="flex flex-row items-center space-x-1">
+                    <Link href="/account" title="Account">Home</Link>
+                    <span className="separator"></span>
+                    {formData ? (
+                        <>
+                            <span className="font-extrabold">Edit pet {formData.Name}</span>
+                        </>
+                    ) : (
+                        <>
+                            <span className="font-extrabold">Add new pet</span>
+                        </>
+                    )}
+                </div>
+                <section className="flex flex-col space-y-1 w-[100%] flex-wrap items-start relative">
+                    <div className="flex flex-row space-y-1 space-x-[10px] md:justify-center flex-wrap items-start relative w-[100%]">
+                        <div className="flex block w-[100%] md:w-[40%] flex-col space-y-1 p-5 flex-wrap items-start">
+                            <div className="flex w-[100%] text-center justify-center">
+                                {formData ? (
+                                    <>
+                                        <h2 className="font-extrabold">Edit pet {formData.Name}</h2>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h2 className="font-extrabold">Add new pet</h2>
+                                    </>
+                                )}
+                            </div>
+                            <p>Use this form to submit your pet for vaccination. When staff issue vaccine, you may review vaccinations applied to your pet on my pets page.</p>
+                            <form className="flex flex-col w-[100%] flex-wrap items-start space-y-1" onSubmit={handleForm}>
+                                <div className="flex w-[100%]  flex-wrap p-5 flex-col items-center justify-center space-y-1">
+                                    <div className="avatar-image w-[150px] h-[150px] relative flex flex-col space-y-0 space-x-0">
+                                        {isFileUploading && avatarPreview ? (
+                                            <>
+                                                <img src={avatarPreview} title="Pet's avatar" alt="Pet's avatar" className="opacity-[0.4]"/>
+                                                <div className="w-[150px] h-[150px] absolute top-0 flex justify-center items-center z-20">
+                                                    <LoadingLoop className="text-[25px]"/>
+                                                </div>
+                                            </>
+                                        ) : null}
+                                        {!isFileUploading && avatarPreview ? (
+                                            <>
+                                                <img src={avatarPreview} title="Pet's avatar" alt="Pet's avatar"/>
+                                            </>
+                                        ) : null}
+                                    </div>
+                                    <Button type="button" isLoading={isFileUploading} label="Upload avatar"
+                                            className="button-primary rounded-sm flex justify-center min-w-[200px]" onClick={UploadAvatar}/>
+                                    <input type="file" className="hidden" ref={uploadBtn} accept={'image/png,image/jpeg'} onChange={HandleUpload}/>
+                                    <span>Allowed extensions: jpg, jpeg and png format.</span>
+                                </div>
+                                <AnimatedInput type="text" label="Pet name" name="Name" defaultValue={formData ? formData.Name : ""} className="control-input rounded-md w-[100%]" onChange={ValidateInput}/>
+                                {formErrors.Name ? <span className="error-text">{formErrors.Name}</span> : null}
+                                <AnimatedInput type="number" label="Pet age" name="Age" defaultValue={formData ? formData.Age : 0} className="control-input rounded-md w-[100%]" min="1" max="50" onChange={ValidateInput}/>
+                                {formErrors.Age ? <span className="error-text">{formErrors.Age}</span> : null}
+                                <AnimatedInput type="text" label="Pet type" name="Type" defaultValue={formData ? formData.Type : ""} className="control-input rounded-md w-[100%]" onChange={ValidateInput}/>
+                                {formErrors.Type ? <span className="error-text">{formErrors.Type}</span> : null}
+                                <Button type="submit" isLoading={isFormSubmitting} label="Add pet"
+                                        className="button-default flex justify-center w-[100%]"/>
+                            </form>
+                        </div>
+
+                    </div>
+                </section>
+        </>
+    )
+});
+export default PetForm;
