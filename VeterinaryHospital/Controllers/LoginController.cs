@@ -32,43 +32,56 @@ namespace VeterinaryHospital.Controllers
             _logger = logger;
         }
         [HttpPost]
-        public async Task<IActionResult> Index([FromBody] User model)
+        public async Task<IActionResult> Index([FromBody] LoginForm model)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
-            }
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null || _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password) == PasswordVerificationResult.Failed)
-            {
-                return Unauthorized(new { isLoggedIn = false, Message = "Invalid email or password" });
-            }
-
-            // Generate JWT token
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var secretKey = _configuration["JwtSettings:SecretKey"];
-            if (string.IsNullOrEmpty(secretKey))
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Internal server error" });
-            }
-            var key = Encoding.ASCII.GetBytes(secretKey);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null || _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, model.Password) == PasswordVerificationResult.Failed)
                 {
-                new Claim(ClaimTypes.Name, user.GetFullName()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Email, user.Email),
+                    return Ok(new { isLoggedIn = false, Message = "Invalid email or password" });
+                }
+
+                // Generate JWT token
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var userId = user.Id;
+                var email = user.Email;
+                if (string.IsNullOrEmpty(user.Id) || string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.UserName))
+                {
+                    return Ok( new {isLoggedIN = false, Message = "Invalid user data for token generation" });
+                }
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new[]
+                    {
+                new Claim(JwtRegisteredClaimNames.Name, userId),
+                new Claim(JwtRegisteredClaimNames.Email, email),
+                new Claim(JwtRegisteredClaimNames.Sub, userId), // Subject claim
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), // Unique Token ID
 
             }),
-                Expires = DateTime.UtcNow.AddHours(2),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
+                    Issuer = _configuration["JwtSettings:Issuer"],
+                    Audience = _configuration["JwtSettings:Audience"],
 
-            return Ok(new { Token = tokenString, IsAdmin = user.Group.IsAdminGroup});
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_configuration["JwtSettings:SecretKey"])), SecurityAlgorithms.HmacSha512Signature)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+
+                var tokenString = tokenHandler.WriteToken(token);
+                _logger.LogWarning($"Token data: {tokenString}");
+                return Ok(new { Token = tokenString, isLoggedIn = true });
+            } catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error while logging in");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "Internal server error" });
+            }
         }
     }
-         
+    public class LoginForm()
+    {
+        public string Email { get; set; }
+        public string Password { get; set; }
+        public string ? AccessToken { get; set; }
+        public string? RefreshToken { get; set; }
+    }
 }

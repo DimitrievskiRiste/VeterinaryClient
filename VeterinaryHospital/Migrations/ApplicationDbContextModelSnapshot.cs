@@ -315,6 +315,10 @@ namespace VeterinaryHospital.Migrations
                     b.Property<int>("PetId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -359,10 +363,13 @@ namespace VeterinaryHospital.Migrations
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
+                    b.Property<string>("AccessToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Age")
                         .HasColumnType("int");
 
-                    b.Property<int>("AvatarId")
+                    b.Property<int?>("AvatarId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("BirthDate")
@@ -377,6 +384,9 @@ namespace VeterinaryHospital.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Surname")
@@ -479,9 +489,7 @@ namespace VeterinaryHospital.Migrations
                 {
                     b.HasOne("VeterinaryHospital.Models.Avatar", "Avatar")
                         .WithMany("Users")
-                        .HasForeignKey("AvatarId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AvatarId");
 
                     b.HasOne("VeterinaryHospital.Models.Group", "Group")
                         .WithMany("Users")

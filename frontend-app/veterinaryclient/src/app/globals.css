@@ -24,10 +24,18 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
-.login, .navigation, .modal, .register, .block {
+.login, .modal, .register, .block{
   background-color:#f3f3f3e6;
   border:1px solid #cfcfcfdd;
   box-shadow: 0 0 10px #dddd;
+}
+.nav-inner {
+  color:#000;
+}
+.navigation, .side-nav {
+  background:#2f598b;
+  box-shadow:0 0 10px #2c5497;
+  color:#ffff;
 }
 .control-group {
   position:relative;
@@ -94,7 +102,7 @@ body {
 }
 .control-input {
   padding:10px;
-  border:1px solid rgba(117, 116, 116, 0.87);
+  border:1px solid #cfcdcddd;
   font:inherit;
   background:#ffff;
 }
@@ -103,7 +111,7 @@ input,textarea,p,dl,dt,ul,li,dd,.nav-link {
 }
 .button-default {
   padding:10px;
-  border:1px solid #dddd;
+  border:1px solid #cfcdcddd;
   background: #ffff;
   transition:all ease-in-out .5s;
 }
@@ -119,10 +127,12 @@ span {
 }
 .nav-item,.nav-link {
   position:relative;
+  color:inherit;
 }
 .nav-item .nav-link {
   padding:10px;
   display: block;
+  color:inherit;
 }
 .modal-overlay {
   position:absolute;
@@ -291,4 +301,71 @@ span {
   background: #4175d2;
   color:#ddd;
   cursor: pointer;
+}
+.side-nav .nav-links {
+  position:relative;
+  width:100%;
+}
+.nav-links .nav-item {
+  position:relative;
+  background-color: #3a6699;
+  width:100%;
+  border-bottom:1px solid #2f598b;
+  display: flex;
+  justify-content: center;
+  box-shadow:0 0 5px #283f5b;
+  color:inherit;
+}
+.nav-links .nav-item:first-child {
+  border-top:1px solid #2f598b;
+}
+.nav-item > .nav-link {
+  position:relative;
+  width:100%;
+  justify-content: center;
+  text-align:center;
+  padding:10px;
+  color:inherit;
+}
+.admin-badge:before {
+  content:"Admin";
+  fon-family:Arial, sans-serif;
+  font-size:14px;
+}
+.admin-badge {
+  padding:5px;
+  background-color:#be4848;
+  color:#ffff;
+  border-radius:10px;
+  border:1px solid #aa4141;
+  font-weight:bolder;
+}
+.profile-username > span {
+  font-size:15px;
+  font-weight:bolder;
+}
+.user-badge {
+  padding:5px;
+  background-color:#4882e8;
+    color:#ffff;
+  font-weight: bolder;
+    border-radius:10px;
+    border:1px solid #2c5497;
+}
+.user-badge:before {
+  content:"User";
+  font-family:Arial, sans-serif;
+  font-size:14px;
+}
+.avatar-image {
+  background:#ffff;
+    border:1px solid #cfcfcfdd;
+  width:150px;
+  height:150px;
+  max-width: 150px;
+  max-height:150px;
+}
+.avatar-image > img {
+  max-width: 100%;
+  max-height:100%;
 }

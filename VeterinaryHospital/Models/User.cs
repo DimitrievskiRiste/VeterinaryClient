@@ -28,6 +28,9 @@ namespace VeterinaryHospital.Models
         public Group Group { get; set; }
         public int ?AvatarId { get; set; }
         public Avatar? Avatar { get; set; }
+        public string? AccessToken { get; set; }
+        public string? RefreshToken { get; set; }
+
 
     }
 }

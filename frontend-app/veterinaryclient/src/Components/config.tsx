@@ -51,24 +51,43 @@ export async function sendData(endpoint:string, method:string, data:object){
  * @param data
  * @returns Error message or JSON data if successfully
  */
-export async function fetchAuthorizedData(endpoint:string, jwtToken:string, method:string, data:object)
+export async function fetchAuthorizedData(endpoint:string, jwtToken:any, method:string, data:object|null, cacheTtl = 300)
 {
-    const request = await fetch(`${apiUrl()}/${endpoint}`, {
-        headers:{
-            "Content-Type":"application/json",
-            "Authorization":`Bearer ${jwtToken}`
-        },
-        method:method,
-        body:JSON.stringify(data)
-    });
-    if(!request.ok){
-        const errorMessage = request.statusText, code = request.status;
-        return {
-            hasErrors:true,
-            message:errorMessage,
-            code:code
-        }
+    var request;
+    if(data){
+        request = await fetch(`${apiUrl()}/${endpoint}`, {
+            headers:{
+                "Content-Type":"application/json",
+                "Authorization":"Bearer "+jwtToken,
+                "Cache-Control":`private, max-age=${cacheTtl}, must-revalidate`
+            },
+            method:method,
+            body:JSON.stringify(data)
+        });
     } else {
-        return request.json();
+        request = await fetch(`${apiUrl()}/${endpoint}`, {
+            headers:{
+                "Content-Type":"application/json",
+                "Authorization":`Bearer ${jwtToken}`
+            },
+            method:method,
+        });
+    }
+    switch(request.status)
+    {
+        case 200:
+            return {
+                hasErrors: false,
+                data: request.json(),
+                code: request.status
+            }
+        default:
+            return {
+                hasErrors:true,
+                message:request.statusText,
+                code:request.status,
+                request:request,
+                headers:request.headers.entries()
+            }
     }
 }

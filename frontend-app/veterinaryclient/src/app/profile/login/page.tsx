@@ -10,37 +10,52 @@ import {useRouter} from "next/navigation";
 const CookieNotice = dynamic(() => import("@/Components/CookieNotice"),{ssr:false});
 export default function Login({...props}:{props:any}) {
     type FormData = {
-        email:null|string,
-        password:null|string
+        Email:null|string,
+        Password:null|string
     }
     const [data, setData] = useState<FormData>({
-        email:null,
-        password:null
+        Email:null,
+        Password:null
     });
     const [formErrors, setFormErrors] = useState<FormData>({
-        email:null,
-        password:null
+        Email:null,
+        Password:null
     });
     const router = useRouter();
     const setEmail = (e) => {
         const v = e.target.value;
         if(/^([a-zA-Z0-9_]+@[a-zA-Z0-9]{2,}\.[a-z]{2,})$/.test(v)){
-            setFormErrors((prev) => ({...prev, email:null}));
-            setData((prev) => ({...prev, email:v}));
+            setFormErrors((prev) => ({...prev, Email:null}));
+            setData((prev) => ({...prev, Email:v}));
         } else {
-            setFormErrors((prev) => ({...prev, email: "Invalid email address!"}));
-            setData((prev) => ({...prev, email:null}));
+            setFormErrors((prev) => ({...prev, Email: "Invalid email address!"}));
+            setData((prev) => ({...prev, Email:null}));
         }
     }
     const setPassword = (e) => {
         const password = e.target.value;
-        setData((prev) => ({...prev, password:password}));
+        setData((prev) => ({...prev, Password:password}));
     }
-    const handleData = async () => {
-        if(!data.email || !data.password) {
+    const handleData = async (e) => {
+        e.preventDefault();
+        if(!data.Email || !data.Password) {
             return;
         }
-        // to do handling login process.
+        setIsLoading(true);
+        const req = await fetch("/api/login", {
+           method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify(data)
+        });
+        const res = await req.json();
+        if(res.isLoggedIn){
+            router.push("/account");
+        } else {
+            alert("Error: "+res.message);
+            setIsLoading(false);
+        }
     }
     const [isLoading, setIsLoading] = useState(false);
     const [isAccountRecoveryLoading, setAccountRecoveryLoading] = useState(false);
@@ -63,7 +78,7 @@ export default function Login({...props}:{props:any}) {
                             <h1 className="font-bold">Veterinary Clinic Login</h1>
                         </div>
                         <div className="login-formFields w-[100%] flex flex-row space-x-1 space-y-1">
-                            <form className="flex w-[100%] flex-col space-y-1">
+                            <form onSubmit={handleData} className="flex w-[100%] flex-col space-y-1">
                                 <AnimatedInput type="email" label="Email address" className="control-input w-[100%] rounded-md"
                                                onChange={setEmail}/>
                                 {formErrors.email ?
@@ -72,9 +87,8 @@ export default function Login({...props}:{props:any}) {
                                                className="control-input rounded-md w-[100%]"
                                                onChange={setPassword}/>
                                 <div className="flex w-[100%] flex-col justify-center space-y-1">
-                                    <button type="button" className="button-default w-[100%]">
-                                        Login
-                                    </button>
+                                    <Button type="submit" isLoading={isLoading} className="button-default w-[100%] flex justify-center min-w-[200px]"
+                                            label="Login"/>
                                     <div className="flex flex-row w-[100%] items-center">
                                         <span className="whiteline w-[50%]"></span>
                                         <span>OR</span>
