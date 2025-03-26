@@ -3,12 +3,14 @@ import {FC, memo, useEffect, useRef, useState} from "react";
 import AnimatedInput from "@/Components/AnimatedInput";
 import Button from "@/Components/Button";
 type PetsComponent = {
-    data:any;
+    data:Array;
+    user:any;
 }
-const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data}) {
+const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}) {
     const [petData, setPetData] = useState(data);
     const [searchResults, setSearchResults] = useState([]);
     const petsTable = useRef(null);
+    const [userData, setUserData] = useState(user);
     const DoSearch = (e) => {
         const {value} = e.target;
         if(value.length < 3) {
@@ -29,7 +31,6 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data}) {
         } else {
             setSearchData(value);
             setFormErrors((prev) => ({...prev, search: null}));
-            console.log(petData);
             const searchResults = petData.filter((pet) => {
                 return pet.name.toLowerCase().includes(value.toLowerCase()) || pet.age.toString().includes(value) || pet.type.toLowerCase().includes(value.toLowerCase()) || pet.user.name.toLowerCase().includes(value.toLowerCase());
             });
@@ -50,6 +51,7 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data}) {
     const [IsEditPageLoading, setIsEditPageLoading] = useState(false);
     const searchRef = useRef(null);
     const [searchData, setSearchData] = useState(null);
+    const [IsVaccinePageLoading, setIsVaccinePageLoading] = useState(false);
     return (
         <>
             <div className="flex w-[100%] flex-col flex-wrap items-start space-y-1">
@@ -58,26 +60,38 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data}) {
                                    onChange={DoSearch}/>
                     {formErrors.search ? <span className="error-text">{formErrors.search}</span> : null}
                 </div>
-                <div ref={petsTable} className="flex w-[100%] flex-col flex-wrap items-center space-y-1 p-5  block">
+                <div ref={petsTable} className="flex w-[100%] flex-col flex-wrap items-center space-y-1 p-1 md:p-5  block">
                     <table className="w-[100%]" cellSpacing="0" cellPadding="0" role="table">
-                        <thead>
+                        <thead className="p-5">
                         <tr>
                             <th>Avatar</th>
                             <th>Name</th>
-                            <th>Type</th>
+                            <th className="hidden md:table-cell">Type</th>
                             <th>Age</th>
+                            <th className={userData.group.isAdminGroup ? "table-cell" : "hidden"}>
+                                Owner
+                            </th>
                             <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody className="w-[100%]">
+                        {console.log(petData)}
                         {petData && petData.map((pet, index) => (
-                                <tr key={index}>
-                                    <td><img src={`${pet.avatar.imagePath}`} title={pet.name} alt={pet.name} className="avatar-image w-[50px] h-[50px] md:w-[100px] md:h-[100px]"/></td>
-                                    <td>{pet.name}</td>
-                                    <td>{pet.type}</td>
-                                    <td>{pet.age}</td>
-                                    <td><Button isLoading={IsEditPageLoading} type="button" label="Edit pet" className="p-0 md:p-auto button-primary text-center"/></td>
-                                </tr>
+                                    <tr key={index}>
+                                        <td><img src={`${pet.avatar?.imagePath}`} title={pet.name} alt={pet.name} className="avatar-image w-[50px] h-[50px] md:w-[100px] md:h-[100px]"/></td>
+                                        <td>{pet.name}</td>
+                                        <td className="hidden md:table-cell">{pet.type}</td>
+                                        <td>{pet.age}</td>
+                                        <td className={userData.group.isAdminGroup ? "table-cell" : "hidden"}>
+                                            {pet.user.name}
+                                        </td>
+                                            <td>
+                                                <div className="flex flex-col space-y-3 items-center w-[100%] mt-1">
+                                                    <Button isLoading={IsEditPageLoading} type="button" label="Edit pet" className="p-0 md:p-auto button-primary text-center"/>
+                                                    <Button isLoading={IsVaccinePageLoading} type="button" label="Vaccines" className="p-0 md:p-auto button-green text-center"/>
+                                                </div>
+                                            </td>
+                                    </tr>
                         ))}
                         </tbody>
                     </table>
@@ -89,8 +103,11 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data}) {
                         <tr>
                             <th>Avatar</th>
                             <th>Name</th>
-                            <th>Type</th>
+                            <th className="hidden md:table-cell">Type</th>
                             <th>Age</th>
+                            <th className={userData.group.isAdminGroup ? "table-cell" : "hidden"}>
+                                Owner
+                            </th>
                             <th>Action</th>
                         </tr>
                         </thead>
@@ -99,9 +116,17 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data}) {
                             <tr key={index}>
                                 <td><img src={`${pet.avatar.imagePath}`} title={pet.name} alt={pet.name} className="avatar-image w-[50px] h-[50px] md:w-[100px] md:h-[100px]"/></td>
                                 <td>{pet.name}</td>
-                                <td>{pet.type}</td>
+                                <td className="hidden md:table-cell">{pet.type}</td>
                                 <td>{pet.age}</td>
-                                <td><Button isLoading={IsEditPageLoading} type="button" label="Edit pet" className="p-0 md:p-auto button-primary text-center"/></td>
+                                <td className={userData.group.isAdminGroup ? "table-cell" : "hidden"}>
+                                    {pet.user.name}
+                                </td>
+                                <td>
+                                    <div className="flex flex-col space-y-3 items-center w-[100%] mt-1">
+                                        <Button isLoading={IsEditPageLoading} type="button" label="Edit pet" className="p-0 md:p-auto button-primary text-center"/>
+                                        <Button isLoading={IsVaccinePageLoading} type="button" label="Vaccines" className="p-0 md:p-auto button-green text-center"/>
+                                    </div>
+                                </td>
                             </tr>
                         ))}
                         </tbody>

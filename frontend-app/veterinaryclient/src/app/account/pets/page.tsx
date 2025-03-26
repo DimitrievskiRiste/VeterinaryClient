@@ -10,6 +10,7 @@ export default function Pets()
 {
     const [pets, setPets] = useState([]);
     const [isPetsLoading, setIsPetsLoading] = useState(true);
+    const[userData, setUserData] = useState(null);
     const router = useRouter();
     useEffect(() => {
         async function getPets() {
@@ -39,7 +40,7 @@ export default function Pets()
     },[]);
     return (
         <>
-            <MembersTemplate>
+            <MembersTemplate data={setUserData}>
                 <div className="flex w-[100%] flex-col space-y-1 flex-wrap items-start">
                     <div className="flex-row flex w-[100%] items-center space-x-2">
                         <Link href="/account" title="Account">Home</Link>
@@ -54,7 +55,26 @@ export default function Pets()
                         </>
                     ) : (
                         <>
-                            <PetsComponent data={pets}/>
+                            {userData === null ? (
+                                <>
+                                    <div className="flex block p-5 w-[100%] justify-center items-center">
+                                        <LoadingLoop/>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    {userData.group.isAdminGroup ? (
+                                        <>
+                                            <p>Because you're an admin, you can view all pets and their owners in the columns. You can also search by owner name, pet name and pet type.</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p>Here are only displayed pets you've added. You can search by pet name and pet type</p>
+                                        </>
+                                    )}
+                                    <PetsComponent data={pets} user={userData}/>
+                                </>
+                    )}
                         </>
                     )}
                 </div>

@@ -12,7 +12,7 @@ using VeterinaryHospital.Data;
 namespace VeterinaryHospital.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250321001555_CreateInitialMigrations")]
+    [Migration("20250322235237_CreateInitialMigrations")]
     partial class CreateInitialMigrations
     {
         /// <inheritdoc />

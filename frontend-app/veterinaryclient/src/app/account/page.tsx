@@ -7,7 +7,6 @@ import {LoadingLoop} from "@/Components/Icons";
 export default function Account()
 {
     const [userData, setUserData] = useState(null);
-    console.log(userData);
     return (
             <>
                 <MembersTemplate data={setUserData}>

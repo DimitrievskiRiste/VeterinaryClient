@@ -25,11 +25,12 @@ namespace VeterinaryHospital.Data
             base.OnModelCreating(modelBuilder);
 
             // Configure the relationships
+            /*
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Pets)
                 .WithOne(p => p.User)
                 .HasForeignKey(p => p.UserId);
-
+            */
             modelBuilder.Entity<Pet>()
                 .HasMany(p => p.Vaccines)
                 .WithOne(v => v.Pet)
@@ -47,6 +48,10 @@ namespace VeterinaryHospital.Data
                 .WithMany(a => a.Pets)
                 .HasForeignKey(p => p.AvatarId)
                 .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Pet>()
+                .HasOne(p => p.User)
+                .WithMany(u => u.Pets)
+                .HasForeignKey(p => p.UserId);
         }
     }
 }

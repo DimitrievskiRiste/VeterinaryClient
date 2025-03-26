@@ -80,7 +80,7 @@ body {
 .whiteline {
   border-top: 1px solid #c3c3c3;
 }
-.button-default:disabled,.button-primary:disabled{
+.button-default:disabled,.button-primary:disabled, .button-green:disabled{
   cursor:not-allowed !important;
 }
 .separator::after{
@@ -374,6 +374,9 @@ table tbody tr {
   border-bottom:1px solid #dddd;
   width:100%;
 }
+table tbody tr td {
+  text-align:center;
+}
 table tbody tr:nth-child(odd) {
   background-color: #d6d8da;
 }
@@ -386,4 +389,17 @@ table tbody tr:nth-child(odd) {
     width:100%;
     height:100%;
   }
+}
+.button-green {
+  background: #2ba2af;
+  padding:10px;
+  color:#ffff;
+  font-weight: bold;
+  transition: 0.2s ease-in-out all;
+  cursor: pointer;
+}
+.button-green:hover{
+  background: #1c6573;
+  color:#ffff;
+  cursor: pointer;
 }

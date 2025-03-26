@@ -10,8 +10,10 @@ import {LoadingLoop} from "@/Components/Icons";
 export default function Logout()
 {
     const [isLoading, setIsLoading] = useState(true);
+    const [message, setMessage] = useState("Logging you out, please wait");
     const router = useRouter();
     const HandleRedirect = () => {
+        setMessage("Redirecting you to the home page.");
         setIsLoading(true);
         router.push("/");
     }
@@ -24,6 +26,7 @@ export default function Logout()
             if(data.hasErrors){
                 alert("An error occured while logging out.");
             } else {
+                setMessage("You have been successfully logged out.");
                 setIsLoading(false);
             }
         }
@@ -40,7 +43,7 @@ export default function Logout()
                         <Link href="/profile/logout" title="Logout">Logout</Link>
                     </div>
                     <section className="block p-5 flex flex-col space-y-1 w-[80%] md:w-[50%] flex-wrap justify-center">
-                        <h1 className="font-extrabold text-center">{isLoading ? "Logging you out, please wait" : "Logout successflly"}</h1>
+                        <h1 className="font-extrabold text-center">{message}</h1>
                         {isLoading ? (
                             <>
                                 <div className="flex flex-row w-[100%] justify-center">
