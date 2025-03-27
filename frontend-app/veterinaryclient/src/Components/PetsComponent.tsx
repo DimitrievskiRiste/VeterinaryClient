@@ -2,6 +2,7 @@
 import {FC, memo, useEffect, useRef, useState} from "react";
 import AnimatedInput from "@/Components/AnimatedInput";
 import Button from "@/Components/Button";
+import PetForm from "@/Components/PetForm";
 type PetsComponent = {
     data:Array;
     user:any;
@@ -32,7 +33,8 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
             setSearchData(value);
             setFormErrors((prev) => ({...prev, search: null}));
             const searchResults = petData.filter((pet) => {
-                return pet.name.toLowerCase().includes(value.toLowerCase()) || pet.age.toString().includes(value) || pet.type.toLowerCase().includes(value.toLowerCase()) || pet.user.name.toLowerCase().includes(value.toLowerCase());
+                pet.user.fullname = `${pet.user.name} ${pet.user.surname}`;
+                return pet.name.toLowerCase().includes(value.toLowerCase()) || pet.age.toString().includes(value) || pet.type.toLowerCase().includes(value.toLowerCase()) || pet.user.name.toLowerCase().includes(value.toLowerCase()) || pet.user.surname.toLowerCase().includes(value.toLowerCase()) || pet.user.fullname.toLowerCase().includes(value.toLowerCase());
             });
             setSearchResults(searchResults);
             if(!petsTable.current.classList.contains("hidden")) {
@@ -52,6 +54,12 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
     const searchRef = useRef(null);
     const [searchData, setSearchData] = useState(null);
     const [IsVaccinePageLoading, setIsVaccinePageLoading] = useState(false);
+    const [petInfo, setPetInfo] = useState(null);
+    const EditPet = (index) => {
+        console.log(index);
+        setIsEditPageLoading(true);
+        setPetInfo(index);
+    }
     return (
         <>
             <div className="flex w-[100%] flex-col flex-wrap items-start space-y-1">
@@ -75,7 +83,6 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
                         </tr>
                         </thead>
                         <tbody className="w-[100%]">
-                        {console.log(petData)}
                         {petData && petData.map((pet, index) => (
                                     <tr key={index}>
                                         <td><img src={`${pet.avatar?.imagePath}`} title={pet.name} alt={pet.name} className="avatar-image w-[50px] h-[50px] md:w-[100px] md:h-[100px]"/></td>
@@ -83,11 +90,11 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
                                         <td className="hidden md:table-cell">{pet.type}</td>
                                         <td>{pet.age}</td>
                                         <td className={userData.group.isAdminGroup ? "table-cell" : "hidden"}>
-                                            {pet.user.name}
+                                            {pet.user.name} {pet.user.surname}
                                         </td>
                                             <td>
                                                 <div className="flex flex-col space-y-3 items-center w-[100%] mt-1">
-                                                    <Button isLoading={IsEditPageLoading} type="button" label="Edit pet" className="p-0 md:p-auto button-primary text-center"/>
+                                                    <Button isLoading={IsEditPageLoading} type="button" label="Edit pet" onClick={() => EditPet(pet)} className="p-0 md:p-auto button-primary text-center"/>
                                                     <Button isLoading={IsVaccinePageLoading} type="button" label="Vaccines" className="p-0 md:p-auto button-green text-center"/>
                                                 </div>
                                             </td>
@@ -119,7 +126,7 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
                                 <td className="hidden md:table-cell">{pet.type}</td>
                                 <td>{pet.age}</td>
                                 <td className={userData.group.isAdminGroup ? "table-cell" : "hidden"}>
-                                    {pet.user.name}
+                                    {pet.user.name} {pet.user.surname}
                                 </td>
                                 <td>
                                     <div className="flex flex-col space-y-3 items-center w-[100%] mt-1">
@@ -132,6 +139,16 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
                         </tbody>
                     </table>
                 </section>
+                {petInfo !== null ? (
+                    <>
+                        {console.log(petInfo)}
+                        <div className="flex fixed h-[100%] w-[100%] modal-overlay justify-center z-[100]">
+                            <div className="flex flex-col space-y-1 w-[100%] justify-center">
+                                <PetForm data={petInfo} user={user}/>
+                            </div>
+                        </div>
+                    </>
+                ) : null}
             </div>
         </>
     )

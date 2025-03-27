@@ -24,8 +24,7 @@ export default function Pets()
             switch(res.status){
                 case 200:
                     const data = await res.json();
-                    setPets(data.body.$values);
-                    console.log(data.body);
+                    setPets(data.body);
                     setIsPetsLoading(false);
                     return true;
                 case 401:

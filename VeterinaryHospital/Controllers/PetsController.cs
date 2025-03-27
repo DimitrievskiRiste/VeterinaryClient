@@ -78,76 +78,81 @@ namespace VeterinaryHospital.Controllers
         [Authorize]
         public async Task<IActionResult> get()
         {
-            // extract user id from claims
-            var userId = User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
-            if (userId == null)
+            try
             {
-                return Unauthorized(new { Message = "User not found" });
-            }
-            // If is user admin then we will get all pets from cache, if cache is empty then we will get all pets from database and save it to cache
-            var user = await _context.Users.Include(x => x.Group).FirstOrDefaultAsync(u => u.Email == userId);
-            if (user == null)
-            {
-                return Unauthorized(new { Message = "User not found" });
-            }
-            // get user pets from cache if exists, if not get it from database and save it to cache
-            var pets = _cache.Get<List<Pet>>("pets");
-
-            if (pets == null)
-            {
-                pets = await _context.Pets.Include("Avatar").Include("User").ToListAsync();
-                _cache.Set("pets", pets, new MemoryCacheEntryOptions
+                // extract user id from claims
+                var userId = User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+                if (userId == null)
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30)
-                });
-            }
-            if (user.Group.IsAdminGroup)
+                    return Unauthorized(new { Message = "User not found" });
+                }
+                // If is user admin then we will get all pets from cache, if cache is empty then we will get all pets from database and save it to cache
+                var user = await _context.Users.Include(x => x.Group).FirstOrDefaultAsync(u => u.Email == userId);
+                if (user == null)
+                {
+                    return Unauthorized(new { Message = "User not found" });
+                }
+                // get user pets from cache if exists, if not get it from database and save it to cache
+                var pets = _cache.Get<List<Pet>>("pets");
+
+                if (pets == null)
+                {
+                    pets = await _context.Pets.Include("Avatar").Include("User").ToListAsync();
+                    _cache.Set("pets", pets, new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30)
+                    });
+                }
+                if (user.Group.IsAdminGroup)
+                {
+                    return await ReturnPetData(pets, user);
+                }
+                else
+                {
+                    return await ReturnPetData(pets.Where(x => x.UserId == user.Id).ToList(), user);
+                }
+            } catch (Exception e)
             {
-                return await ReturnPetData(pets, user);
-            } else
-            {
-                return await ReturnPetData(pets.Where(x => x.UserId == user.Id).ToList(), user);
+                // log error
+                _logger.LogWarning(e,"An error occured");
+                return StatusCode(500);
             }
 
         }
         public async Task<IActionResult> ReturnPetData(List<Pet> pets, User user)
         {
             foreach (var pet in pets)
-                {
-                    var avatar = _cache.Get<Avatar>($"avatar-{pet.AvatarId}");
-                    if (avatar == null)
-                    {
-                        avatar = _context.Avatars.FirstOrDefault(x => x.Id == pet.AvatarId);
-                        _cache.Set($"avatar-{pet.AvatarId}", avatar, new MemoryCacheEntryOptions
-                        {
-                            AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30)
-                        });
-                    }
-                    pet.Avatar = avatar;
-                    pet.User = new Models.User
-                    {
-                        Name = pet.User.Name,
-                        Age = pet.User.Age,
-                        Surname = pet.User.Surname,
-                        GroupId = pet.User.GroupId,
-                        Group = pet.User.Group
-                    };
-                }
-                return Ok(pets);
-
-        }
-        [HttpGet("get/{id}")]
-        [Authorize]
-        public async Task<IActionResult> GetId(int id)
-        {
-            // extract user id from claims
-            var userId = User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
-            if (userId == null)
             {
-                return Unauthorized(new { Message = "User not found" });
+                var avatar = _cache.Get<Avatar>($"avatar-{pet.AvatarId}");
+                if (avatar == null)
+                {
+                    avatar = _context.Avatars.FirstOrDefault(x => x.Id == pet.AvatarId);
+                    _cache.Set($"avatar-{pet.AvatarId}", avatar, new MemoryCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30)
+                    });
+                }
+                pet.Avatar = avatar;
+                if(pet.User == null)
+                {
+                    pet.User = await _context.Users.FirstAsync(x => x.Id == pet.UserId);
+
+                }
+                pet.User = new User {
+                    Id = pet.User.Id,
+                    Email = pet.User.Email,
+                    Group = pet.User.Group,
+                    Name = pet.User.Name,
+                    Surname = pet.User.Surname,
+                    Age = pet.User.Age,
+                    Password = null,
+                    PasswordHash = null,
+                    GroupId = pet.User.GroupId
+                };
             }
-            return Ok(new { Message = "Pet retrieved successfully" });
+            return Ok(pets);
         }
+        
         public class PetForm
         {
             public string Name { get; set; }

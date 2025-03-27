@@ -403,3 +403,15 @@ table tbody tr:nth-child(odd) {
   color:#ffff;
   cursor: pointer;
 }
+.search-result {
+  background:#ffff;
+}
+.search-data:first-child{
+    border-top:1px solid #dddd;
+}
+.button-default:hover:focus {
+  background-color:#be4848;
+}
+.search-data {
+  border-bottom:1px solid #dddd;
+}

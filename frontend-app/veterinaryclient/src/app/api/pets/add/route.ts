@@ -6,7 +6,7 @@ export async function POST(req:NextRequest)
     try {
         const token = req.cookies.get("token")?.value;
         if(!token) {
-            return new NextResponse.json({status: 401, body: "Unauthorized"}, {
+            return NextResponse.json({status: 401, body: "Unauthorized"}, {
                 status: 401,
                 statusText: "Unauthorized API access."
             });

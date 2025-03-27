@@ -27,28 +27,48 @@ namespace VeterinaryHospital.Controllers
         [Authorize]
         public async Task<IActionResult> All()
         {
-            // get user claims
-            var user = User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
-            var member = await _context.Users.Include("Group").FirstOrDefaultAsync(u => u.Email == user);
-            if (user == null || member  == null)
+            try
             {
-                return Unauthorized(new { Message = "User not found" });
+                // get user claims
+                var user = User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+                var member = await _context.Users.Include("Group").FirstOrDefaultAsync(u => u.Email == user);
+                if (user == null || member == null)
+                {
+                    return Unauthorized(new { Message = "User not found" });
+                }
+                if (member.Group.IsAdminGroup)
+                {
+                    // Get all users from the cache, if not found, try to getget them from the database
+                    var data = await GetUsers();
+                    // log data output
+                    _logger.LogInformation("Data: {data}", data);
+                    return Ok(data);
+                }
+                else
+                {
+                    return Unauthorized(new { Message = "You are not authorized to view this resource" });
+                }
             }
-            if (member.Group.IsAdminGroup)
+            catch (Exception e)
             {
-                // Get all users from the cache, if not found, try to getget them from the database
-                return await GetUsers();
-            } else
-            {
-                return Unauthorized(new { Message = "You are not authorized to view this resource" });
+                _logger.LogError(e, "An error occurred while fetching the users");
+                return StatusCode(500, new { Message = "An error occurred while fetching the users" });
             }
         }
-        private async Task<IActionResult> GetUsers()
+        public async Task<IActionResult> GetUsers()
         {
             var users = await _cache.GetOrCreateAsync("users", async entry =>
             {
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-                return await _context.Users.Include("Group").ToListAsync();
+                var items = new List<User>();
+                var users = await _context.Users.Include("Group").ToListAsync();
+                foreach(var user in users)
+                {
+                    user.Password = null;
+                    user.PasswordHash = null;
+                    items.Add(user);
+                }
+                return items;
             });
             return Ok(users);
         }

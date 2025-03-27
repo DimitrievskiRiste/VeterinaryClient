@@ -17,7 +17,7 @@ export async function POST(req:NextRequest)
                 maxAge:3600,
                 path:"/",
                 sameSite:"Strict",
-                httpOnly:false,
+                httpOnly:true,
                 secure:process.env.NODE_ENV !== "development"
             });
             return NextResponse.json({isLoggedIn:true});

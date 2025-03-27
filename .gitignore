@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /frontend-app/veterinaryclient/public/avatars/c38fcdd1-cef4-4487-8436-bf0949de1249
+/frontend-app/veterinaryclient/public/avatars
