@@ -73,7 +73,7 @@ namespace VeterinaryHospital.Controllers
                     return await ExtractVaccine(vaccines, pets, PetId);
                 } else
                 {
-                    if (pets.Where(pets => pets.Id == PetId).First().UserId == member.Id)
+                    if (pets.Where(pets => pets.Id == PetId).First(x => x.UserId == member.Id) != null)
                     {
                         return await ExtractVaccine(vaccines, pets, PetId);
                     }

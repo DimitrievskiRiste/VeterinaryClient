@@ -12,7 +12,7 @@ using VeterinaryHospital.Data;
 namespace VeterinaryHospital.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250322235237_CreateInitialMigrations")]
+    [Migration("20250328051302_CreateInitialMigrations")]
     partial class CreateInitialMigrations
     {
         /// <inheritdoc />
@@ -292,6 +292,9 @@ namespace VeterinaryHospital.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("canManageAdmins")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.ToTable("Groups");
@@ -347,6 +350,9 @@ namespace VeterinaryHospital.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VaccineId"));
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()

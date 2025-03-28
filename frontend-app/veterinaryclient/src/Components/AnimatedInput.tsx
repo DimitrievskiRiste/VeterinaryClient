@@ -6,20 +6,27 @@ type AnimatedInputProps = {
     name: string;
     value?: string;
     className?: string;
+    labelRef:any;
+    inputRef:any;
+    ref:string|null;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
     [key: string]: any; // Allow additional props
 };
-const AnimatedInput:FC<AnimatedInputProps> = memo(function AnimatedInput({type, label, ...props})
+const AnimatedInput:FC<AnimatedInputProps> = memo(function AnimatedInput({type, label, labelRef, inputRef, ...props})
 {
     const [inputType] = useState(type);
     const [inputLabel] = useState(label);
-    const inputRef = useRef(null);
-    const labelRef = useRef(null);
+    if(!labelRef){
+        labelRef = useRef(null);
+    }
+    if(!inputRef){
+        inputRef = useRef(null);
+    }
     const HandleTransformAnim = (e) => {
         labelRef.current.classList.add('anim-label');
     }
     useEffect(() => {
-        if(inputRef.current?.value.length > 0) {
+        if(inputRef.current?.value?.length > 0) {
             labelRef.current.classList.add('anim-label');
         }
     }, [inputRef.current]);

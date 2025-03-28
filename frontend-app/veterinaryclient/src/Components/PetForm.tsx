@@ -9,8 +9,9 @@ import AnimatedInput from "@/Components/AnimatedInput";
 type PetForm = {
     data:any;
     user:any;
+    dismissCallback:any;
 }
-const PetForm:FC<PetForm> = memo(function PetForm({data, user}) {
+const PetForm:FC<PetForm> = memo(function PetForm({data, user, dismissCallback}) {
     type PetInfo = {
         PetId: number | null;
         Name: string | null;
@@ -42,6 +43,7 @@ const PetForm:FC<PetForm> = memo(function PetForm({data, user}) {
     const [searchQuery, setSearchQuery] = useState(null);
     const searchInput = useRef(null);
     const searchDiv = useRef(null);
+    const labelref = useRef(null);
     const [buttons, setButtons] = useState({});
     const handleSearch = (e) => {
         const {value} = e.target;
@@ -174,7 +176,14 @@ const PetForm:FC<PetForm> = memo(function PetForm({data, user}) {
             setPetInfo((prev) => ({...prev, UserId:user.id}));
         }
         if(data != null && typeof data === "object"){
-            setPetInfo((prev) => ({...prev, ...data}));
+            setPetInfo({
+                PetId: data.id,
+                Name: data.name,
+                Age: data.age,
+                AvatarId: data.avatar.id,
+                Type: data.type,
+                UserId: data.user.id
+            })
             setFormData(data);
             setAvatarPreview(data.avatar.imagePath);
         }
@@ -190,16 +199,16 @@ const PetForm:FC<PetForm> = memo(function PetForm({data, user}) {
             return;
         }
         setIsFormSubmitting(true);
-        let res;
+        var res;
         if(formData != null ){
-            res = await fetch("/api/pets/edit", {
+            res = await fetch("/api/pets/update", {
                 method: "POST",
-                body: JSON.stringify(petInfo)
+                body: petInfo
             });
         } else {
             res = await fetch("/api/pets/add", {
                 method: "POST",
-                body: JSON.stringify(petInfo)
+                body: petInfo
             });
         }
         const data = await res.json();
@@ -210,7 +219,7 @@ const PetForm:FC<PetForm> = memo(function PetForm({data, user}) {
                     alert(data.message);
                     return;
                 } else {
-                    alert("Pet added successfully.");
+                    alert(data.body.message);
                     router.push("/account/pets");
                     return;
                 }
@@ -234,39 +243,39 @@ const PetForm:FC<PetForm> = memo(function PetForm({data, user}) {
         setButtons((prev) => ({...prev, [`button_${index}`]:false}));
         setSearchQuery(null);
         setSearchResults(null);
+
         searchInput.current.value = `${user.name} ${user.surname}`;
         searchDiv.current.classList.remove("flex");
         searchDiv.current.classList.add("hidden");
     }
     const findOwnerBy = (criteria, value) => {
         if(usersData != null){
-            const user = usersData.find((user) => user[criteria] === value);
-            if(user != null ){
-                console.log(user);
-                return `${user.name} ${user.surname}`;
+            const user = usersData?.find((user) => user[criteria] === value);
+            if(user != null && typeof user != "undefined"){
+                labelref.current.classList.add("anim-label");
+                return `${user?.name} ${user?.surname}`;
             }
+        }
+    }
+    const TriggerDismiss = () => {
+        if(typeof dismissCallback === "function"){
+            dismissCallback();
         }
     }
     return (
         <>
-                <div className="flex flex-row items-center space-x-1">
-                    <Link href="/account" title="Account">Home</Link>
-                    <span className="separator"></span>
-                    {formData ? (
-                        <>
-                            <span className="font-extrabold">Edit pet {formData.Name}</span>
-                        </>
-                    ) : (
-                        <>
-                            <span className="font-extrabold">Add new pet</span>
-                        </>
-                    )}
-                </div>
                 <section className="flex flex-col space-y-1 w-[100%] flex-wrap items-start relative">
                     <div className="flex flex-row space-y-1 space-x-[10px] md:justify-center flex-wrap items-start relative w-[100%]">
                         <div className="flex block w-[100%] md:w-[40%] flex-col space-y-1 p-5 flex-wrap items-start">
+                            {formData != null ? (
+                                <>
+                                    <div className="flex flex-row w-[100%] justify-end">
+                                        <div className="pointer p-5" onClick={TriggerDismiss}>X</div>
+                                    </div>
+                                </>
+                            ) : null}
                             <div className="flex w-[100%] text-center justify-center">
-                                {formData.name != null ? (
+                                {formData != null && typeof formData.name !== undefined && formData.name != null ? (
                                     <>
                                         <h2 className="font-extrabold">Edit pet {formData.name}</h2>
                                     </>
@@ -299,15 +308,15 @@ const PetForm:FC<PetForm> = memo(function PetForm({data, user}) {
                                     <input type="file" className="hidden" ref={uploadBtn} accept={'image/png,image/jpeg'} onChange={HandleUpload}/>
                                     <span>Allowed extensions: jpg, jpeg and png format.</span>
                                 </div>
-                                <AnimatedInput type="text" label="Pet name" name="Name" defaultValue={formData.name ? formData.name : ""} className="control-input rounded-md w-[100%]" onChange={ValidateInput}/>
+                                <AnimatedInput type="text" label="Pet name" name="Name" defaultValue={formData && formData.name ? formData.name : ""} className="control-input rounded-md w-[100%]" onChange={ValidateInput}/>
                                 {formErrors.Name ? <span className="error-text">{formErrors.Name}</span> : null}
-                                <AnimatedInput type="number" label="Pet age" name="Age" defaultValue={formData.age ? formData.age : 0} className="control-input rounded-md w-[100%]" min="1" max="50" onChange={ValidateInput}/>
+                                <AnimatedInput type="number" label="Pet age" name="Age" defaultValue={formData && formData.age ? formData.age : 0} className="control-input rounded-md w-[100%]" min="1" max="50" onChange={ValidateInput}/>
                                 {formErrors.Age ? <span className="error-text">{formErrors.Age}</span> : null}
-                                <AnimatedInput type="text" label="Pet type" name="Type" defaultValue={formData.type ? formData.type : ""} className="control-input rounded-md w-[100%]" onChange={ValidateInput}/>
+                                <AnimatedInput type="text" label="Pet type" name="Type" defaultValue={formData && formData.type ? formData.type : ""} className="control-input rounded-md w-[100%]" onChange={ValidateInput}/>
                                 {formErrors.Type ? <span className="error-text">{formErrors.Type}</span> : null}
                                 {userData.group.isAdminGroup && usersData ? (
                                     <>
-                                        <AnimatedInput type="search" label="Search for pet owner" defaultValue={formData.user.id && usersData != null ? findOwnerBy('id', formData.user.id) : ""} className="control-input rounded-md w-[100%]" ref={searchInput} onChange={handleSearch}/>
+                                        <AnimatedInput type="search" label="Search for pet owner" inputRef={searchInput}  defaultValue={formData && formData.user.id && usersData != null ? findOwnerBy('id', formData.user.id) : ""} className="control-input rounded-md w-[100%]" labelRef={labelref} onChange={handleSearch}/>
                                         <div ref={searchDiv} className="hidden flex-col space-y-1 w-[100%] search-result">
                                             <span>Search results for: {searchQuery}</span>
                                             {searchResults && searchResults.map((user, index) => (

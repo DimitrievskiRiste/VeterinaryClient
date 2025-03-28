@@ -18,6 +18,9 @@ namespace VeterinaryHospital.Models
         public required bool CanAdd { get; set; }
         [Required]
         public required bool IsAdminGroup { get; set;}
-        public List<User>? Users { get; set; } = new List<User>();
+        [Required]
+        public required bool canManageAdmins { get; set; }
+        
+        public List<User> ?Users { get; set; }
     }
 }

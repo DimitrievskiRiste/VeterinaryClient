@@ -289,6 +289,9 @@ namespace VeterinaryHospital.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("canManageAdmins")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.ToTable("Groups");
@@ -344,6 +347,9 @@ namespace VeterinaryHospital.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VaccineId"));
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()

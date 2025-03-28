@@ -53,7 +53,8 @@ namespace VeterinaryHospital.Migrations
                     CanEdit = table.Column<bool>(type: "bit", nullable: false),
                     CanDelete = table.Column<bool>(type: "bit", nullable: false),
                     CanAdd = table.Column<bool>(type: "bit", nullable: false),
-                    IsAdminGroup = table.Column<bool>(type: "bit", nullable: false)
+                    IsAdminGroup = table.Column<bool>(type: "bit", nullable: false),
+                    canManageAdmins = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -249,7 +250,8 @@ namespace VeterinaryHospital.Migrations
                     VaccineId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PetId = table.Column<int>(type: "int", nullable: false)
+                    PetId = table.Column<int>(type: "int", nullable: false),
+                    DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {

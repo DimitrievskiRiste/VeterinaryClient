@@ -47,7 +47,8 @@ namespace VeterinaryHospital.Controllers
                             CanEdit = true,
                             CanDelete = true,
                             CanAdd = true,
-                            IsAdminGroup = true
+                            IsAdminGroup = true,
+                            canManageAdmins = true
                         };
                         _context.Groups.Add(adminGroup);
                         await _context.SaveChangesAsync();
@@ -65,7 +66,8 @@ namespace VeterinaryHospital.Controllers
                             CanEdit = false,
                             CanDelete = false,
                             CanAdd = false,
-                            IsAdminGroup = false
+                            IsAdminGroup = false,
+                            canManageAdmins = false
                         };
                         _context.Groups.Add(userGroup);
                         await _context.SaveChangesAsync();

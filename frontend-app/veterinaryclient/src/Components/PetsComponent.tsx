@@ -4,7 +4,7 @@ import AnimatedInput from "@/Components/AnimatedInput";
 import Button from "@/Components/Button";
 import PetForm from "@/Components/PetForm";
 type PetsComponent = {
-    data:Array;
+    data:any;
     user:any;
 }
 const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}) {
@@ -50,15 +50,35 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
     const [formErrors, setFormErrors] = useState({
         search:null
     });
-    const [IsEditPageLoading, setIsEditPageLoading] = useState(false);
     const searchRef = useRef(null);
     const [searchData, setSearchData] = useState(null);
     const [IsVaccinePageLoading, setIsVaccinePageLoading] = useState(false);
     const [petInfo, setPetInfo] = useState(null);
-    const EditPet = (index) => {
-        console.log(index);
-        setIsEditPageLoading(true);
-        setPetInfo(index);
+    const EditPet = (pet,index) => {
+        setEditButtons((prev) => ({...prev, [`button_${index}`]:true}));
+        setPetInfo(pet);
+    }
+    const [editButtons, setEditButtons] = useState(null);
+    const [vButtons, setVButtons] = useState(null);
+    useEffect(() => {
+        async function updateButtons() {
+            if(petData) {
+                for(let i = 0; i < petData.length; i++) {
+                    setPetData((prev) => {
+                        prev[i].btnIndex = i;
+                        return prev;
+                    });
+                    setEditButtons((prev) => ({...prev, [`button_${i}`]:false}));
+                    setVButtons((prev) => ({...prev,[`button_${i}`]:false}));
+                }
+            }
+        }
+        updateButtons();
+    }, []);
+    const closeModal = () => {
+        const index = petInfo.btnIndex;
+        setEditButtons((prev) => ({...prev, [`button_${index}`]:false}));
+        setPetInfo(null);
     }
     return (
         <>
@@ -83,7 +103,7 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
                         </tr>
                         </thead>
                         <tbody className="w-[100%]">
-                        {petData && petData.map((pet, index) => (
+                        {petData && editButtons && petData.map((pet, index) => (
                                     <tr key={index}>
                                         <td><img src={`${pet.avatar?.imagePath}`} title={pet.name} alt={pet.name} className="avatar-image w-[50px] h-[50px] md:w-[100px] md:h-[100px]"/></td>
                                         <td>{pet.name}</td>
@@ -94,7 +114,8 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
                                         </td>
                                             <td>
                                                 <div className="flex flex-col space-y-3 items-center w-[100%] mt-1">
-                                                    <Button isLoading={IsEditPageLoading} type="button" label="Edit pet" onClick={() => EditPet(pet)} className="p-0 md:p-auto button-primary text-center"/>
+
+                                                    <Button isLoading={editButtons[`button_${index}`]} type="button" label="Edit pet" onClick={() => EditPet(pet,index)} className="p-0 md:p-auto button-primary text-center"/>
                                                     <Button isLoading={IsVaccinePageLoading} type="button" label="Vaccines" className="p-0 md:p-auto button-green text-center"/>
                                                 </div>
                                             </td>
@@ -119,32 +140,31 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
                         </tr>
                         </thead>
                         <tbody className="w-[100%]">
-                        {searchResults.map((pet, index) => (
-                            <tr key={index}>
-                                <td><img src={`${pet.avatar.imagePath}`} title={pet.name} alt={pet.name} className="avatar-image w-[50px] h-[50px] md:w-[100px] md:h-[100px]"/></td>
-                                <td>{pet.name}</td>
-                                <td className="hidden md:table-cell">{pet.type}</td>
-                                <td>{pet.age}</td>
-                                <td className={userData.group.isAdminGroup ? "table-cell" : "hidden"}>
-                                    {pet.user.name} {pet.user.surname}
-                                </td>
-                                <td>
-                                    <div className="flex flex-col space-y-3 items-center w-[100%] mt-1">
-                                        <Button isLoading={IsEditPageLoading} type="button" label="Edit pet" className="p-0 md:p-auto button-primary text-center"/>
-                                        <Button isLoading={IsVaccinePageLoading} type="button" label="Vaccines" className="p-0 md:p-auto button-green text-center"/>
-                                    </div>
-                                </td>
-                            </tr>
+                        {editButtons && searchResults.map((pet, index) => (
+                                <tr key={index}>
+                                    <td><img src={`${pet.avatar.imagePath}`} title={pet.name} alt={pet.name} className="avatar-image w-[50px] h-[50px] md:w-[100px] md:h-[100px]"/></td>
+                                    <td>{pet.name}</td>
+                                    <td className="hidden md:table-cell">{pet.type}</td>
+                                    <td>{pet.age}</td>
+                                    <td className={userData.group.isAdminGroup ? "table-cell" : "hidden"}>
+                                        {pet.user.name} {pet.user.surname}
+                                    </td>
+                                    <td>
+                                        <div className="flex flex-col space-y-3 items-center w-[100%] mt-1">
+                                            <Button isLoading={editButtons[`button_${index}`]} type="button" label="Edit pet" className="p-0 md:p-auto button-primary text-center"/>
+                                            <Button isLoading={IsVaccinePageLoading} type="button" label="Vaccines" className="p-0 md:p-auto button-green text-center"/>
+                                        </div>
+                                    </td>
+                                </tr>
                         ))}
                         </tbody>
                     </table>
                 </section>
                 {petInfo !== null ? (
                     <>
-                        {console.log(petInfo)}
-                        <div className="flex fixed h-[100%] w-[100%] modal-overlay justify-center z-[100]">
-                            <div className="flex flex-col space-y-1 w-[100%] justify-center">
-                                <PetForm data={petInfo} user={user}/>
+                        <div className="flex fixed h-[100%] w-[100%] items-start  z-[100] left-0 ">
+                            <div className="flex flex-col space-y-1 w-[100%] items-start">
+                                <PetForm data={petInfo} user={user} dismissCallback={closeModal}/>
                             </div>
                         </div>
                     </>

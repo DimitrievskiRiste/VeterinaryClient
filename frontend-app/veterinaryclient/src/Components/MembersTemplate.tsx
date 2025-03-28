@@ -25,7 +25,6 @@ const MembersTemplate:FC<MembersTemplate> = memo(function MembersTemplate({data,
             setUserData(d);
             console.log(typeof data);
 
-            return true;
         }
         getUser();
     },[]);
@@ -62,7 +61,7 @@ const MembersTemplate:FC<MembersTemplate> = memo(function MembersTemplate({data,
                     </nav>
                 </header>
                 <div className="flex flex-row w-[100%] flex-wrap items-start space-x-10 relative">
-                    <aside className="hidden side-nav md:flex space-y-1 flex-row flex-wrap items-start w-[300px] fixed  z-50 top-[5.5em] h-[100%]">
+                    <aside className="hidden side-nav lg:flex space-y-1 flex-row flex-wrap items-start w-[300px] fixed  z-50 top-[5.5em] h-[100%]">
                         <div className="profile-info flex w-[100%] flex-col space-y-1 items-center">
                             {userData ? (
                                 <>
@@ -80,14 +79,21 @@ const MembersTemplate:FC<MembersTemplate> = memo(function MembersTemplate({data,
                                 <Link href="/account/settings" className="nav-link" title="Settings">Settings</Link>
                             </li>
                             <li className="nav-item">
-                                <Link href="/account/pets" className="nav-link" title="Pets">My pets</Link>
+                                <Link href="/account/pets" className="nav-link" title="Pets">Pets</Link>
                             </li>
                             <li className="nav-item">
                                 <Link href="/profile/logout" className="nav-link" title="Logout">Logout</Link>
                             </li>
+                            {userData?.group.isAdminGroup ? (
+                                <>
+                                    <li className="nav-item">
+                                        <Link href="/account/vaccines/add" className="nav-link" title="Add vaccine">Add vaccine</Link>
+                                    </li>
+                                </>
+                            ) : null}
                         </ul>
                     </aside>
-                    <div className="flex flex-col max-w-[100%] w-[100%] top-[6em] md:ml-[20em] md:max-w-[80%] md:w-[80%] flex-wrap items-start absolute md:top-[5.5em]">
+                    <div className="flex flex-col max-w-[100%] w-[100%] top-[6em] lg:ml-[20em] md:max-w-[100%] lg:w-[80%] lg:max-w-[80%] flex-wrap items-start absolute md:top-[5.5em]">
                         {children}
                     </div>
                 </div>
