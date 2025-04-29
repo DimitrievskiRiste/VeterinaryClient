@@ -321,6 +321,19 @@ span {
   transition: 0.2s ease-in-out all;
   cursor: pointer;
 }
+.button-red {
+  padding:10px;
+  color:#ffff;
+  font-weight:bold;
+  transition:0.2s ease-in-out all;
+  cursor:pointer;
+  background-color:#be4848;
+}
+.button-red:hover {
+  background:#a03c3c;
+  color:#ffff;
+  cursor:pointer;
+}
 .button-primary:hover{
   background: #4175d2;
   color:#ddd;

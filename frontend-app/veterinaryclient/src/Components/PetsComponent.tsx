@@ -5,6 +5,7 @@ import Button from "@/Components/Button";
 import PetForm from "@/Components/PetForm";
 import {DotsVerticalOutline} from "@/Components/Icons";
 import {useRouter} from "next/navigation";
+
 type PetsComponent = {
     data:any;
     user:any;
@@ -63,6 +64,8 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
     const ref = createRef();
     const [editButtons, setEditButtons] = useState(null);
     const [vButtons, setVButtons] = useState(null);
+    const [vaccinePageBtn, setVaccinePageBtn] = useState(null);
+    const [removeBtn, setRemoveBtn] = useState(null);
     useEffect(() => {
         async function updateButtons() {
             if(petData) {
@@ -73,6 +76,8 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
                     });
                     setEditButtons((prev) => ({...prev, [`button_${i}`]:false}));
                     setVButtons((prev) => ({...prev,[`button_${i}`]:false}));
+                    setVaccinePageBtn((prev) => ({...prev, [`button_${i}`]:false}));
+                    setRemoveBtn((prev) => ({...prev, [`button_${i}`]:false}));
                 }
             }
         }
@@ -84,8 +89,72 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
         setPetInfo(null);
     }
     const loc = useRouter();
+    const [removalPetData, setRemovalPetData] = useState(null);
+    const [isPetRemoving, setIsPetRemoving] = useState(false);
+    const HandlePetRemoval = async () => {
+        if(removalPetData){
+            setIsPetRemoving(true);
+            const data = await fetch("/api/pets/delete",{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify(removalPetData)
+            });
+            const res = await data.json();
+            if(res.status !== 200) {
+                console.error(res);
+                return;
+            }
+            setPetData((prev) => (prev.filter((pet) => pet.id !== removalPetData.id)));
+            setIsPetRemoving(false);
+            setRemovalPetData(null);
+            setRemoveBtn((prev) => {
+                const shadowCopy = prev;
+                for(const i in shadowCopy) {
+                    shadowCopy[i] = false;
+                }
+                return shadowCopy;
+            });
+        }
+    }
+    const [isCancelling, setIsCancelling] = useState(false);
     return (
         <>
+            {removalPetData ? (
+                <>
+                    <div className="modal-overlay flex flex-col w-[100%] h-[100%] justify-center z-[200] items-center" role="dialog" aria-modal="true">
+                        <div className="modal flex block w-[100%] md:w-[50%] flex-col space-y-1 items-center">
+                            <h3 className="text-[20px] font-extrabold">{isPetRemoving ? `Your pet ${removalPetData.name} is being removed... Please wait...` : `Are you sure you want to remove ${removalPetData.name}?`}</h3>
+                            {isPetRemoving ? (
+                                <>
+                                    <p>Your pet {removalPetData.name} is being removed, please wait. This action cannon be undone!</p>
+                                </>
+                            ) : (
+                                <>
+                                    <p>This action cannon be undone, so read carefully. <strong>This action will trigger pet removal permanently from server & cache.</strong></p>
+                                </>
+                            )}
+                            <div className="flex flex-row justify-center space-x-1 space-between w-[100%] items-center">
+                                <Button type="button" isLoading={isPetRemoving} label="Remove this pet" className="button button-red text-center" onClick={HandlePetRemoval}/>
+                                <Button type="button" isLoading={isCancelling} label="Cancel" className="button button-default text-center" onClick={() => {
+                                    setIsCancelling(true);
+                                    setRemoveBtn((prev) => {
+                                        const shadowCopy = prev;
+                                        for(const i in shadowCopy) {
+                                            shadowCopy[i] = false;
+                                        }
+                                        return shadowCopy;
+                                    });
+                                    setRemovalPetData(null);
+                                    setIsCancelling(false);
+                                    setIsPetRemoving(false);
+                                }}/>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            ) : null}
             <div className="flex w-[100%] flex-col flex-wrap items-start space-y-1">
                 <div className="flex flex-col space-y-1 w-[100%] p-5 justify-center items-center block">
                     <AnimatedInput type="search" label="Search pet by name, age, type or owner.." className="control-input rounded-md w-[100%]"
@@ -140,9 +209,13 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
                                                             }}/>
                                                             {userData.group.isAdminGroup ? (
                                                                 <>
-                                                                    <Button type="button" isLoading={IsVaccinePageLoading} type="button" className="button-primary w-[100%] text-center" label="Add vaccine" onClick={() => {
-                                                                        setIsVaccinePageLoading(true);
+                                                                    <Button type="button" isLoading={vaccinePageBtn[`button_${index}`]} type="button" className="button-primary w-[100%] text-center" label="Add vaccine" onClick={() => {
+                                                                        setVaccinePageBtn((prev) => ({...prev, [`button_${index}`]:true}));
                                                                         loc.push(`/account/pet/${pet.id}/add-vaccine`);
+                                                                    }}/>
+                                                                    <Button type="button" isLoading={removeBtn[`button_${index}`]} className="button-red w-[100%] text-center" label="Remove pet" onClick={() => {
+                                                                        setRemoveBtn((prev) => ({...prev, [`button_${index}`]:true}));
+                                                                        setRemovalPetData(pet);
                                                                     }}/>
                                                                 </>
                                                             ) : null}
@@ -199,6 +272,18 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
                                                     </div>
                                                     <Button isLoading={editButtons[`button_${index}`]} type="button" label="Edit pet" onClick={() => EditPet(pet,index)} className="p-0 md:p-auto text-[13px] w-[100%] md:text-[18px] button-primary text-center"/>
                                                     <Button isLoading={IsVaccinePageLoading} type="button" label="Vaccines" className="p-0 md:p-auto button-green w-[100%] text-center text-[13px] md:text-[18px]"/>
+                                                    {userData.group.isAdminGroup ? (
+                                                        <>
+                                                            <Button type="button" isLoading={vaccinePageBtn[`button_${index}`]} type="button" className="button-primary w-[100%] text-center" label="Add vaccine" onClick={() => {
+                                                                setVaccinePageBtn((prev) => ({...prev, [`button_${index}`]:true}));
+                                                                loc.push(`/account/pet/${pet.id}/add-vaccine`);
+                                                            }}/>
+                                                            <Button type="button" isLoading={removeBtn[`button_${index}`]} className="button-red w-[100%] text-center" label="Remove pet" onClick={() => {
+                                                                setRemoveBtn((prev) => ({...prev, [`button_${index}`]:true}));
+                                                                setRemovalPetData(pet);
+                                                            }}/>
+                                                        </>
+                                                    ) : null}
                                                 </div>
                                             </div>
                                         </div>

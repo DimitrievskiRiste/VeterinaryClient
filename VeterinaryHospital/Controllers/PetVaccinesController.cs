@@ -47,6 +47,7 @@ namespace VeterinaryHospital.Controllers
                 int id = Convert.ToInt16(petid);
                 var vaccines = GetVaccines();
                 var petVaccines = new List<PetVaccine>();
+               
                 foreach (var vaccine in vaccines)
                 {
                     if (vaccine.PetId == id)
@@ -63,10 +64,7 @@ namespace VeterinaryHospital.Controllers
                             {
                                 petVaccines.Add(vaccine);
                             }
-                            else
-                            {
-                                return Unauthorized(new { Message = "User not found" });
-                            }
+                        
                         }
                     }
                 }
