@@ -9,6 +9,7 @@ export default function Add()
 {
     const [userData, setUserData] = useState(null);
     const [petsData, setPetsData] = useState(null);
+    const [isPetLoading, setPetLoading] = useState(true);
     const router = useRouter();
     useEffect(() => {
         async function getPets() {
@@ -23,6 +24,7 @@ export default function Add()
                 case 200:
                     const data = await res.json();
                     setPetsData(data.body);
+                    setPetLoading(false);
                     return true;
                 case 401:
                     router.push("/profile/login");
@@ -39,7 +41,11 @@ export default function Add()
             <Suspense fallback={<PageLoading/>}>
                 <MembersTemplate data={setUserData}>
                     <div className="flex flex-col w-[100%] flex-wrap md:justify-center md:items-center p-5 space-y-1">
-                        <VaccineForm pets={petsData}/>
+                        {isPetLoading ? (
+                            <PageLoading/>
+                        ) : (
+                            <VaccineForm pets={petsData}/>
+                        )}
                     </div>
                 </MembersTemplate>
             </Suspense>

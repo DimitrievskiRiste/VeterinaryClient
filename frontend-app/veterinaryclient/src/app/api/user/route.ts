@@ -7,7 +7,6 @@ export async function POST(req:NextRequest)
     try {
         const c= await cookies();
         const token = c.get("token")?.value;
-        console.error("Token is: ", token);
         if(!token){
             console.log("[API] User is not authenticated. Missing token.");
             return NextResponse.redirect(new URL("/profile/login", req.url));
@@ -16,7 +15,7 @@ export async function POST(req:NextRequest)
         switch(res.code)
         {
             case 200:
-                const data = await res.data;
+                const data = res.data;
                 return NextResponse.json(data);
             case 401:
                 console.log(res);

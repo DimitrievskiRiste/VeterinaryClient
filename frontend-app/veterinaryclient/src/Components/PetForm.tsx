@@ -155,10 +155,13 @@ const PetForm:FC<PetForm> = memo(function PetForm({data, user, dismissCallback})
                 case 200:
                     const data = await res.json();
                     const r = [];
-                    for(let i = 0; i < data.length; i++){
+                    if(!data.result){
+                        return;
+                    }
+                    for(let i = 0; i < data.result.length; i++){
                         setButtons((prev) => ({...prev, [`button_${i}`]:false}));
                     }
-                    setUsersData(data);
+                    setUsersData(data.result);
                     return;
                 case 401:
                     //router.push("/profile/login");
@@ -202,13 +205,19 @@ const PetForm:FC<PetForm> = memo(function PetForm({data, user, dismissCallback})
         var res;
         if(formData != null ){
             res = await fetch("/api/pets/update", {
+                headers:{
+                    "Content-Type":"application/json"
+                },
                 method: "POST",
-                body: petInfo
+                body: JSON.stringify(petInfo)
             });
         } else {
             res = await fetch("/api/pets/add", {
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 method: "POST",
-                body: petInfo
+                body: JSON.stringify(petInfo)
             });
         }
         const data = await res.json();
@@ -304,7 +313,7 @@ const PetForm:FC<PetForm> = memo(function PetForm({data, user, dismissCallback})
                                         ) : null}
                                     </div>
                                     <Button type="button" isLoading={isFileUploading} label="Upload avatar"
-                                            className="button-primary rounded-sm flex justify-center min-w-[200px]" onClick={UploadAvatar}/>
+                                            className="button-primary rounded-sm flex justify-center" onClick={UploadAvatar}/>
                                     <input type="file" className="hidden" ref={uploadBtn} accept={'image/png,image/jpeg'} onChange={HandleUpload}/>
                                     <span>Allowed extensions: jpg, jpeg and png format.</span>
                                 </div>

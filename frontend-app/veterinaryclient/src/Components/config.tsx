@@ -78,7 +78,7 @@ export async function fetchAuthorizedData(endpoint:string, jwtToken:any, method:
         case 200:
             return {
                 hasErrors: false,
-                data: request.json(),
+                data: await request.json(),
                 code: request.status
             }
         default:

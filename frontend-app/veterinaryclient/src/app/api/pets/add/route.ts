@@ -14,6 +14,7 @@ export async function POST(req:NextRequest)
         const data = await req.json();
         const res = await fetchAuthorizedData("api/pets/add", token, "POST", data);
         const d = await res.data;
+        console.log(d);
         return NextResponse.json({status: res.code, body: d}, {status: res.code, statusText: res.message});
     } catch(e) {
         console.error(e);

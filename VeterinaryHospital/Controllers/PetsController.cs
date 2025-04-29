@@ -46,13 +46,16 @@ namespace VeterinaryHospital.Controllers
                 }
                 _logger.LogWarning("Form: {form}", form);
                 // If is user an admin, he can specify on which user to add pet if not only he can add pet to his account
-                Pet pet = new Pet
+                var member = user.Group.IsAdminGroup ? await _context.Users.Include(p => p.Group).FirstAsync(u => u.Id == form.UserId) : user;
+                var pet = new Pet
                 {
                     Name = form.Name,
                     Age = form.Age,
                     UserId = user.Group.IsAdminGroup ? form.UserId : user.Id,
                     AvatarId = form.AvatarId,
-                    Type = form.Type
+                    Type = form.Type,
+                    User = member
+
                 };
                 // save pet to database and add it to the cache pets. Specify cache expiration 30 days
                 var result = await _context.AddAsync(pet);
@@ -103,11 +106,7 @@ namespace VeterinaryHospital.Controllers
 
                 if (pets == null)
                 {
-                    pets = await _context.Pets.Include("Avatar").Include("User").ToListAsync();
-                    _cache.Set("pets", pets, new MemoryCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30)
-                    });
+                    pets = GetPets();
                 }
                 if (user.Group.IsAdminGroup)
                 {
@@ -124,6 +123,20 @@ namespace VeterinaryHospital.Controllers
                 return StatusCode(500);
             }
 
+        }
+        protected List<Pet> GetPets()
+        {
+            var pets = new List<Pet>();
+            _cache.TryGetValue("pets", out pets);
+            if(pets == null)
+            {
+                pets =  _context.Pets.Include("Avatar").Include("User").ToList();
+                _cache.Set("pets", pets, new MemoryCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromDays(30)
+                });
+            }
+            return pets;
         }
         public async Task<IActionResult> ReturnPetData(List<Pet> pets, User user)
         {
@@ -261,9 +274,113 @@ namespace VeterinaryHospital.Controllers
                 return StatusCode(500, new { Message = "Error updating pet" });
             }
         }
-        public class PetForm
+        [HttpGet("find")]
+        [Authorize]
+        public async Task<IActionResult> FindPet(int PetId)
+        {
+            // get user claims by email address.
+            var user = User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+            var member = _context.Users.Include("Group").Where(p => p.Email == user).First();
+            if (member == null)
+            {
+                return Unauthorized(new { Message = "User not found" });
+            }
+            var pets = GetPets();
+            if (pets.Any())
+            {
+                if (member.Group.IsAdminGroup)
+                {
+                    var pet = pets.Where(p => p.Id == PetId).First();
+                    if (pet != null)
+                    {
+                        return Ok(pet);
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
+                else
+                {
+                    var pet = pets.Where(p => p.Id == PetId).Where(u => u.User.Id == member.Id).First();
+                    if (pet != null)
+                    {
+                        return Ok(pet);
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
+            } else
+            {
+                return NotFound();
+            }
+        }
+        [HttpPost("delete")]
+        [Authorize]
+        public async Task<IActionResult> RemovePet([FromBody] PetData pet)
+        {
+            try
+            {
+                var user = User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+                var member = await _context.Users.Where(p => p.Email == user).Include("Group").FirstAsync();
+                if(member == null)
+                {
+                    return Unauthorized();
+                }
+                if (!member.Group.IsAdminGroup)
+                {
+                    return Unauthorized();
+                }
+                if (pet.PetId == null)
+                {
+                    return BadRequest();
+                }
+                int id = Convert.ToInt32(pet.PetId);
+                var pets = new List<Pet>();
+                _cache.TryGetValue("pets", out pets);
+                if (pets == null)
+                {
+                    var petData = await _context.Pets.Where(u => u.PetId == id).AnyAsync();
+                    if (petData == null)
+                    {
+                        return NotFound();
+                    }
+                    await _context.Pets.Where(u => u.PetId == id).Include("PetVaccines").Include("Avatar").ExecuteDeleteAsync();
+                }
+                var item = pets.Where(l => l.PetId == id).First();
+                if(item == null)
+                {
+                    // let's try to find it from database and remove if exists
+                    var dbResult = await _context.Pets.Where(u => u.PetId == id).Include("PetVaccines").Include("Avatar").AnyAsync();
+                    if (dbResult == null)
+                    {
+                        return NotFound();
+                    }
+                    await _context.Pets.Where(u => u.PetId == id).Include("PetVaccines").Include("Avatar").ExecuteDeleteAsync();
+
+                } else
+                {
+                    // if item exists in cache, then we're sure that also exists in database.
+                    pets.Remove(item);
+                    await _context.Pets.Where(u => u.PetId == id).Include("PetVaccines").Include("Avatar").ExecuteDeleteAsync();
+                }
+                return Ok(new { Message = "Successfully deleted the pet" });
+
+            } catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occured during pet removal");
+                return BadRequest(ex.Message);
+            }
+        }
+        public class PetData
         {
             public int PetId { get; set; }
+        }
+        public class PetForm
+        {
+            public int ?PetId { get; set; }
             public string Name { get; set; }
             public int Age { get; set; }
             public string UserId { get; set; }

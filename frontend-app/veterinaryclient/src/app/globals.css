@@ -135,12 +135,12 @@ span {
   color:inherit;
 }
 .modal-overlay {
-  position:absolute;
+  position:fixed;
   top:0;
   bottom:0;
   left:0;
   height:100%;
-  z-index:10;
+  z-index:1000;
   background:rgba(0,0,0,0.2);
 }
 .modal {
@@ -149,6 +149,30 @@ span {
   background:#ffff;
   border:1px solid #959595dd;
   padding:5px;
+}
+.mobile-nav {
+  background-color:#ffff;
+}
+.mobile-nav > .nav-links {
+  background-color:inherit;
+  width:100%;
+}
+.mobile-nav > .nav-links > .nav-item {
+  background-color: rgba(241, 240, 240, 0.87);
+  border-bottom:1px solid #dddd;
+  box-shadow:none;
+}
+.mobile-nav > .nav-links > .nav-item > a {
+  padding:5px;
+  width:100%;
+  position:relative;
+  text-align:center;
+}
+.mobile-nav > .nav-links > .nav-item:first-child {
+  border-top:1px solid #dddd;
+}
+.mobile-nav span {
+  color:#000;
 }
 .loader {
   position: absolute;
@@ -414,4 +438,20 @@ table tbody tr:nth-child(odd) {
 }
 .search-data {
   border-bottom:1px solid #dddd;
+}
+.dropdown-content {
+  padding:5px;
+  background-color:#ffff;
+  border:1px solid #dddd;
+  left:0;
+}
+.dropdown-content:after {
+  position:absolute;
+  content:"";
+  top:-10px;
+  left:50%;
+  width:0;
+  border-left:10px solid transparent;
+  border-right:10px solid transparent;
+  border-bottom:10px solid #ffff;
 }

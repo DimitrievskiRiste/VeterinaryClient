@@ -22,7 +22,27 @@ async function getData(req:NextRequest){
 }
 export async function middleware(request:NextRequest)
 {
+    const array = new Uint8Array(16);
+    self.crypto.getRandomValues(array); // Use Web Crypto API
+    const nonce = btoa(String.fromCharCode(...array));
+    // base app url
+    const baseUrl = request.nextUrl.origin + "/_next/static";
+    console.log(`[MIDDLEWARE] Base URL: ${baseUrl}`);
+    const csp = `
+        default-src 'self';
+        script-src 'self' 'nonce-${nonce}' ${baseUrl};
+        style-src 'self' 'nonce-${nonce}';
+        img-src 'self' data:;
+        font-src 'self' data:;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    `.replace(/\s{2,}/g, " ").trim();
 
+    const response = NextResponse.next();
+    response.headers.set("Content-Security-Policy", csp);
+    response.headers.set("x-nonce", nonce);
+    console.log(response);
     console.log(`[MIDDLEWARE] ${request.method} ${request.nextUrl.pathname}`);
     if(request.method === "GET" && request.nextUrl.pathname.startsWith("/install"))
     {

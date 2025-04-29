@@ -1,8 +1,10 @@
 "use client"
-import {FC, memo, useEffect, useRef, useState} from "react";
+import {createRef, FC, memo, useEffect, useRef, useState} from "react";
 import AnimatedInput from "@/Components/AnimatedInput";
 import Button from "@/Components/Button";
 import PetForm from "@/Components/PetForm";
+import {DotsVerticalOutline} from "@/Components/Icons";
+import {useRouter} from "next/navigation";
 type PetsComponent = {
     data:any;
     user:any;
@@ -58,6 +60,7 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
         setEditButtons((prev) => ({...prev, [`button_${index}`]:true}));
         setPetInfo(pet);
     }
+    const ref = createRef();
     const [editButtons, setEditButtons] = useState(null);
     const [vButtons, setVButtons] = useState(null);
     useEffect(() => {
@@ -80,6 +83,7 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
         setEditButtons((prev) => ({...prev, [`button_${index}`]:false}));
         setPetInfo(null);
     }
+    const loc = useRouter();
     return (
         <>
             <div className="flex w-[100%] flex-col flex-wrap items-start space-y-1">
@@ -113,10 +117,37 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
                                             {pet.user.name} {pet.user.surname}
                                         </td>
                                             <td>
-                                                <div className="flex flex-col space-y-3 items-center w-[100%] mt-1">
-
-                                                    <Button isLoading={editButtons[`button_${index}`]} type="button" label="Edit pet" onClick={() => EditPet(pet,index)} className="p-0 md:p-auto button-primary text-center"/>
-                                                    <Button isLoading={IsVaccinePageLoading} type="button" label="Vaccines" className="p-0 md:p-auto button-green text-center"/>
+                                                <div className="flex flex-col space-y-3 items-center w-[100%] mt-1 relative">
+                                                    <div className="flex flex-col space-y-1 flex-wrap w-[100%] items-center cursor-pointer" onClick={() => {
+                                                        ref.current = document.getElementById(`dropdown_${index}`);
+                                                        ref.current.classList.replace("hidden","flex");
+                                                    }}>
+                                                        <DotsVerticalOutline className="text-[25px]"/>
+                                                    </div>
+                                                    <div className="flex flex-col space-y-1 w-[100%] flex-wrap mt-[5px] relative items-baseline content-baseline ">
+                                                        <div id={`dropdown_${index}`} suppressHydrationWarning={true} className="hidden flex-wrap dropdown-content items-baseline content-baseline flex-col w-[100%] space-y-1 absolute top-[5px] z-[200]">
+                                                            <div className="flex w-[100%] flex-row items-end content-end justify-end flex-wrap">
+                                                                <div className="cursor-pointer p-5" onClick={() => {
+                                                                    ref.current = document.getElementById(`dropdown_${index}`);
+                                                                    const el = ref.current;
+                                                                    el.classList.replace("flex","hidden");
+                                                                }}>X</div>
+                                                            </div>
+                                                            <Button isLoading={editButtons[`button_${index}`]} type="button" label="Edit pet" onClick={() => EditPet(pet,index)} className="p-0 md:p-auto text-[13px] w-[100%] md:text-[18px] button-primary text-center"/>
+                                                            <Button isLoading={IsVaccinePageLoading} type="button" label="Vaccines" className="p-0 md:p-auto button-green w-[100%] text-center text-[13px] md:text-[18px]" onClick={() => {
+                                                                setIsVaccinePageLoading(true);
+                                                                loc.push(`/account/pet/${pet.id}/vaccines`);
+                                                            }}/>
+                                                            {userData.group.isAdminGroup ? (
+                                                                <>
+                                                                    <Button type="button" isLoading={IsVaccinePageLoading} type="button" className="button-primary w-[100%] text-center" label="Add vaccine" onClick={() => {
+                                                                        setIsVaccinePageLoading(true);
+                                                                        loc.push(`/account/pet/${pet.id}/add-vaccine`);
+                                                                    }}/>
+                                                                </>
+                                                            ) : null}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </td>
                                     </tr>
@@ -150,9 +181,26 @@ const PetsComponent:FC<PetsComponent> = memo(function PetsComponent({data, user}
                                         {pet.user.name} {pet.user.surname}
                                     </td>
                                     <td>
-                                        <div className="flex flex-col space-y-3 items-center w-[100%] mt-1">
-                                            <Button isLoading={editButtons[`button_${index}`]} type="button" label="Edit pet" className="p-0 md:p-auto button-primary text-center"/>
-                                            <Button isLoading={IsVaccinePageLoading} type="button" label="Vaccines" className="p-0 md:p-auto button-green text-center"/>
+                                        <div className="flex flex-col space-y-3 items-center w-[100%] mt-1 relative">
+                                            <div className="flex flex-col space-y-1 flex-wrap w-[100%] items-center cursor-pointer" onClick={() => {
+                                                ref.current = document.getElementById(`dropdown_item_${index}`);
+                                                ref.current.classList.replace("hidden","flex");
+                                            }}>
+                                                <DotsVerticalOutline className="text-[25px]"/>
+                                            </div>
+                                            <div className="flex flex-col space-y-1 w-[100%] flex-wrap mt-[5px] relative items-baseline content-baseline ">
+                                                <div id={`dropdown_item_${index}`} suppressHydrationWarning={true} className="hidden flex-wrap dropdown-content items-baseline content-baseline flex-col w-[100%] space-y-1 absolute top-[5px] z-[200]">
+                                                    <div className="flex w-[100%] flex-row items-end content-end justify-end flex-wrap">
+                                                        <div className="cursor-pointer p-5" onClick={() => {
+                                                            ref.current = document.getElementById(`dropdown_item_${index}`);
+                                                            const el = ref.current;
+                                                            el.classList.replace("flex","hidden");
+                                                        }}>X</div>
+                                                    </div>
+                                                    <Button isLoading={editButtons[`button_${index}`]} type="button" label="Edit pet" onClick={() => EditPet(pet,index)} className="p-0 md:p-auto text-[13px] w-[100%] md:text-[18px] button-primary text-center"/>
+                                                    <Button isLoading={IsVaccinePageLoading} type="button" label="Vaccines" className="p-0 md:p-auto button-green w-[100%] text-center text-[13px] md:text-[18px]"/>
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

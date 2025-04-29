@@ -62,6 +62,19 @@ namespace VeterinaryHospital.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Vaccines",
+                columns: table => new
+                {
+                    VaccineId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Vaccines", x => x.VaccineId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -224,8 +237,7 @@ namespace VeterinaryHospital.Migrations
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PetId = table.Column<int>(type: "int", nullable: false),
-                    AvatarId = table.Column<int>(type: "int", nullable: false),
-                    VaccineId = table.Column<int>(type: "int", nullable: true)
+                    AvatarId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -244,23 +256,29 @@ namespace VeterinaryHospital.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Vaccines",
+                name: "PetVaccines",
                 columns: table => new
                 {
-                    VaccineId = table.Column<int>(type: "int", nullable: false)
+                    PetVaccineId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PetId = table.Column<int>(type: "int", nullable: false),
+                    VaccineId = table.Column<int>(type: "int", nullable: false),
                     DateAdded = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Vaccines", x => x.VaccineId);
+                    table.PrimaryKey("PK_PetVaccines", x => x.PetVaccineId);
                     table.ForeignKey(
-                        name: "FK_Vaccines_Pets_PetId",
+                        name: "FK_PetVaccines_Pets_PetId",
                         column: x => x.PetId,
                         principalTable: "Pets",
                         principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PetVaccines_Vaccines_VaccineId",
+                        column: x => x.VaccineId,
+                        principalTable: "Vaccines",
+                        principalColumn: "VaccineId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -324,38 +342,19 @@ namespace VeterinaryHospital.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Pets_VaccineId",
-                table: "Pets",
-                column: "VaccineId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Vaccines_PetId",
-                table: "Vaccines",
+                name: "IX_PetVaccines_PetId",
+                table: "PetVaccines",
                 column: "PetId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Pets_Vaccines_VaccineId",
-                table: "Pets",
-                column: "VaccineId",
-                principalTable: "Vaccines",
-                principalColumn: "VaccineId");
+            migrationBuilder.CreateIndex(
+                name: "IX_PetVaccines_VaccineId",
+                table: "PetVaccines",
+                column: "VaccineId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Pets_AspNetUsers_UserId",
-                table: "Pets");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Pets_Avatars_AvatarId",
-                table: "Pets");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Pets_Vaccines_VaccineId",
-                table: "Pets");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -372,22 +371,25 @@ namespace VeterinaryHospital.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "PetVaccines");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "Groups");
-
-            migrationBuilder.DropTable(
-                name: "Avatars");
+                name: "Pets");
 
             migrationBuilder.DropTable(
                 name: "Vaccines");
 
             migrationBuilder.DropTable(
-                name: "Pets");
+                name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Avatars");
+
+            migrationBuilder.DropTable(
+                name: "Groups");
         }
     }
 }

@@ -4,7 +4,7 @@ import {BarsOutline, LoadingLoop} from "@/Components/Icons";
 import Link from "next/link";
 
 type MembersTemplate = {
-    data:any;
+    data:Function|null;
     [children:string]:any;
 }
 const MembersTemplate:FC<MembersTemplate> = memo(function MembersTemplate({data, children}) {
@@ -23,8 +23,6 @@ const MembersTemplate:FC<MembersTemplate> = memo(function MembersTemplate({data,
                 data(d);
             }
             setUserData(d);
-            console.log(typeof data);
-
         }
         getUser();
     },[]);
@@ -35,7 +33,9 @@ const MembersTemplate:FC<MembersTemplate> = memo(function MembersTemplate({data,
                 <header className="flex flex-col w-[100%] flex-wrap items-center justify-center">
                     <nav className="flex flex-row flex-wrap items-start w-[100%] navigation space-x-1 p-5 fixed top-0 z-50">
                         <div className="flex flex-row w-[100%] space-x-1 flex-wrap items-center">
-                            <div id="bars" className="flex md:hidden flex-row cursor-pointer p-5">
+                            <div id="bars" className="flex md:hidden flex-row cursor-pointer p-5" onClick={() => {
+                                setActiveMobilenav((prev) => !prev);
+                            }}>
                                 <BarsOutline/>
                             </div>
                             <h1 className="font-extrabold">Members area</h1>
@@ -45,7 +45,12 @@ const MembersTemplate:FC<MembersTemplate> = memo(function MembersTemplate({data,
                                 </div>
                             </div>
                         </div>
-                        <aside className={activeMobilenav ? "flex mobile-nav flex-col flex-wrap items-start w-[60%] md:w-[300px] fixed z-50" : "hidden flex mobile-nav flex-col flex-wrap items-start"}>
+                        <aside className={activeMobilenav ? "flex mobile-nav fixed top-0 h-[100%] left-0 flex-col flex-wrap items-start w-[100%] space-y-1 md:w-[300px] fixed z-50" : "hidden flex mobile-nav flex-col flex-wrap items-start"}>
+                            <div className="flex flex-row w-[100%] justify-end">
+                                <span className="cursor-pointer p-5" onClick={() => {
+                                    setActiveMobilenav((prev) => !prev);
+                                }}>X</span>
+                            </div>
                             <ul className="nav-links nav-inner">
                                 <li className="nav-item">
                                     <Link href="/account/settings" title="Settings">Settings</Link>
@@ -53,6 +58,13 @@ const MembersTemplate:FC<MembersTemplate> = memo(function MembersTemplate({data,
                                 <li className="nav-item">
                                     <Link href="/account/pets" title="Pets">My pets</Link>
                                 </li>
+                                {userData?.group.isAdminGroup ? (
+                                    <>
+                                        <li className="nav-item">
+                                            <Link href="/account/vaccines/add" className="nav-link" title="Add vaccine">Add vaccine</Link>
+                                        </li>
+                                    </>
+                                ) : null}
                                 <li className="nav-item">
                                     <Link href="/profile/logout" title="Logout">Logout</Link>
                                 </li>
@@ -93,7 +105,7 @@ const MembersTemplate:FC<MembersTemplate> = memo(function MembersTemplate({data,
                             ) : null}
                         </ul>
                     </aside>
-                    <div className="flex flex-col max-w-[100%] w-[100%] top-[6em] lg:ml-[20em] md:max-w-[100%] lg:w-[80%] lg:max-w-[80%] flex-wrap items-start absolute md:top-[5.5em]">
+                    <div className="flex flex-col w-[100%] top-[6em] lg:ml-[20em] md:w-[100%] lg:w-[80%] lg:max-w-[80%] flex-wrap items-start absolute md:top-[5.5em]">
                         {children}
                     </div>
                 </div>

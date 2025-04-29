@@ -25,7 +25,7 @@ namespace VeterinaryHospital.Models
         public List<Pet>? Pets { get; set; } = new List<Pet>();
         [Required(ErrorMessage = "You must specify a group for the user")]
         public required int GroupId { get; set; }
-        public Group ?Group { get; set; }
+        public Group Group { get; set; }
         public int ?AvatarId { get; set; }
         public Avatar? Avatar { get; set; }
         public string? AccessToken { get; set; }

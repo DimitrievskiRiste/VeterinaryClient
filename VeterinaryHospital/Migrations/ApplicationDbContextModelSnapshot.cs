@@ -326,18 +326,39 @@ namespace VeterinaryHospital.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("VaccineId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AvatarId");
 
                     b.HasIndex("UserId");
 
+                    b.ToTable("Pets");
+                });
+
+            modelBuilder.Entity("VeterinaryHospital.Models.PetVaccine", b =>
+                {
+                    b.Property<int>("PetVaccineId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PetVaccineId"));
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PetId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VaccineId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PetVaccineId");
+
+                    b.HasIndex("PetId");
+
                     b.HasIndex("VaccineId");
 
-                    b.ToTable("Pets");
+                    b.ToTable("PetVaccines");
                 });
 
             modelBuilder.Entity("VeterinaryHospital.Models.Vaccine", b =>
@@ -348,19 +369,11 @@ namespace VeterinaryHospital.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VaccineId"));
 
-                    b.Property<DateTime>("DateAdded")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PetId")
-                        .HasColumnType("int");
-
                     b.HasKey("VaccineId");
-
-                    b.HasIndex("PetId");
 
                     b.ToTable("Vaccines");
                 });
@@ -471,24 +484,28 @@ namespace VeterinaryHospital.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("VeterinaryHospital.Models.Vaccine", null)
-                        .WithMany("Pets")
-                        .HasForeignKey("VaccineId");
-
                     b.Navigation("Avatar");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("VeterinaryHospital.Models.Vaccine", b =>
+            modelBuilder.Entity("VeterinaryHospital.Models.PetVaccine", b =>
                 {
                     b.HasOne("VeterinaryHospital.Models.Pet", "Pet")
-                        .WithMany("Vaccines")
+                        .WithMany("PetVaccines")
                         .HasForeignKey("PetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("VeterinaryHospital.Models.Vaccine", "Vaccine")
+                        .WithMany("PetVaccines")
+                        .HasForeignKey("VaccineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Pet");
+
+                    b.Navigation("Vaccine");
                 });
 
             modelBuilder.Entity("VeterinaryHospital.Models.User", b =>
@@ -522,12 +539,12 @@ namespace VeterinaryHospital.Migrations
 
             modelBuilder.Entity("VeterinaryHospital.Models.Pet", b =>
                 {
-                    b.Navigation("Vaccines");
+                    b.Navigation("PetVaccines");
                 });
 
             modelBuilder.Entity("VeterinaryHospital.Models.Vaccine", b =>
                 {
-                    b.Navigation("Pets");
+                    b.Navigation("PetVaccines");
                 });
 
             modelBuilder.Entity("VeterinaryHospital.Models.User", b =>

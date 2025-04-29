@@ -22,7 +22,7 @@ export default function NavigationComponent({activePage}:{activePage:any})
                         <BarsOutline style={{fontSize:'24px', fontFamily:'Arial'}}/>
                     </div>
                 </div>
-                <div id="lgnav" className="flex-row items-center hidden md:flex lg:flex flex-wrap navigation space-x-1">
+                <div id="lgnav" className="flex-row items-center hidden md:flex  lg:flex flex-wrap navigation space-x-1">
                     <div className="nav-item">
                         <Link href="/" title="Home page" className={page === 1 ? "nav-link nav-link-active" : "nav-link"}>Home</Link>
                     </div>

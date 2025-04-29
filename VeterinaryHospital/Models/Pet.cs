@@ -1,7 +1,10 @@
-﻿namespace VeterinaryHospital.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace VeterinaryHospital.Models
 {
     public class Pet
     {
+        [Key]
         public int Id { get; set; }
         public required string Name { get; set; }
         public required int Age { get; set; }
@@ -9,8 +12,8 @@
         public string Type { get; set; }
         public int PetId { get; set; }
         
-        public User ?User { get; set; }
-        public List<Vaccine>?Vaccines { get; set; }
+        public User User { get; set; }
+        public List<PetVaccine>?PetVaccines { get; set; }
         public int AvatarId { get; set; }
         public Avatar ? Avatar { get; set; }
     }

@@ -14,8 +14,8 @@ export async function GET(req:NextRequest)
         switch(res.code)
         {
             case 200:
-                const data = await res.data;
-                return NextResponse.json(data.value);
+                const data =  res.data;
+                return NextResponse.json(data);
             case 401:
                 console.log(res);
                 return NextResponse.json(res);

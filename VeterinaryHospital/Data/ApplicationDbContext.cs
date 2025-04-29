@@ -20,6 +20,7 @@ namespace VeterinaryHospital.Data
         public DbSet<Vaccine> Vaccines { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Avatar> Avatars { get; set; }
+        public DbSet<PetVaccine> PetVaccines { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -32,9 +33,10 @@ namespace VeterinaryHospital.Data
                 .HasForeignKey(p => p.UserId);
             */
             modelBuilder.Entity<Pet>()
-                .HasMany(p => p.Vaccines)
+                .HasMany(p => p.PetVaccines)
                 .WithOne(v => v.Pet)
-                .HasForeignKey(v => v.PetId);
+                .HasForeignKey(p => p.PetId)
+                .HasPrincipalKey(c => c.Id);
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Group)
                 .WithMany(g => g.Users)
@@ -52,6 +54,10 @@ namespace VeterinaryHospital.Data
                 .HasOne(p => p.User)
                 .WithMany(u => u.Pets)
                 .HasForeignKey(p => p.UserId);
-        }
+            modelBuilder.Entity<PetVaccine>()
+                .HasOne(v => v.Vaccine)
+                .WithMany(p => p.PetVaccines)
+                .HasForeignKey(v => v.VaccineId);
+    }
     }
 }

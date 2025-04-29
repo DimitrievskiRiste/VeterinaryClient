@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using System.Threading.Tasks;
 using VeterinaryHospital.Data;
 using VeterinaryHospital.Models;
 
@@ -39,7 +40,7 @@ namespace VeterinaryHospital.Controllers
                 if (member.Group.IsAdminGroup)
                 {
                     // Get all users from the cache, if not found, try to getget them from the database
-                    var data = await GetUsers();
+                    var data =  GetUsers();
                     // log data output
                     _logger.LogInformation("Data: {data}", data);
                     return Ok(data);
@@ -55,22 +56,25 @@ namespace VeterinaryHospital.Controllers
                 return StatusCode(500, new { Message = "An error occurred while fetching the users" });
             }
         }
-        public async Task<IActionResult> GetUsers()
+        protected async Task<List<User>> GetUsers()
         {
-            var users = await _cache.GetOrCreateAsync("users", async entry =>
+            var users = new List<User>();
+            if(_cache.Get("users") != null && _cache.TryGetValue("users", out users))
             {
-                entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5);
-                var items = new List<User>();
-                var users = await _context.Users.Include("Group").ToListAsync();
-                foreach(var user in users)
+                return users;
+            } else
+            {
+                users = new List<User>();
+                var members = _context.Users.Include("Group").Include("Avatar").ToList();
+                foreach(var member in members)
                 {
-                    user.Password = null;
-                    user.PasswordHash = null;
-                    items.Add(user);
+                    member.PasswordHash = null;
+                    member.Password = null;
+                    users.Add(member);
                 }
-                return items;
-            });
-            return Ok(users);
+                _cache.Set("users", users, TimeSpan.FromDays(30));
+                return users;
+            }
         }
         [HttpPost("edit")]
         [Authorize]
